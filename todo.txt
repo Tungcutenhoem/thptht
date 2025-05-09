@@ -35,6 +35,45 @@ frontend/
 ├── index.html
 └── package.json
 
+backend/
+├── app/
+│   ├── api/                          # Định nghĩa các route
+│   │   ├── v1/
+│   │   │   ├── endpoints/
+│   │   │   │   ├── classify.py       # /classify/image, /classify/frame
+│   │   │   │   ├── auth.py           # /auth/login (nếu có Admin)
+│   │   │   │   └── admin.py          # /admin/stats, /admin/data
+│   │   │   └── deps.py               # Dependency injection (auth, etc.)
+│   ├── core/                         # Config, settings
+│   │   ├── config.py
+│   │   ├── security.py               # Hash/check password
+│   │   └── logger.py
+│   ├── models/                       # DB Models (nếu lưu kết quả)
+│   │   ├── user.py
+│   │   ├── classification_result.py
+│   │   └── base.py
+│   ├── schemas/                      # Pydantic models
+│   │   ├── auth.py
+│   │   ├── classify.py
+│   │   └── result.py
+│   ├── services/                     # Logic chính xử lý AI
+│   │   ├── classifier.py             # Gọi model: image/video frame
+│   │   ├── video_processor.py        # Xử lý video stream
+│   │   └── utils.py                  # Resize, preprocess, decode img
+│   ├── database/                     # Kết nối DB
+│   │   ├── session.py
+│   │   └── init_db.py
+│   ├── main.py                       # FastAPI entrypoint
+│   └── dependencies.py               # Shared deps
+├── models/                           # (Tùy chọn) Thư mục chứa file model .pt, .h5...
+├── tests/
+│   ├── test_classification.py
+│   └── test_auth.py
+├── requirements.txt
+├── Dockerfile
+└── .env
+
+
 
 
 Giải thích các thành phần chính cho User Interface:
