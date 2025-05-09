@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:8000/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -23,5 +23,39 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const classifyImage = async (imageFile) => {
+  const formData = new FormData();
+  formData.append('file', imageFile);
+  
+  const response = await api.post('/classify/image', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  
+  return response.data.data;
+};
+
+export const classifyFrame = async (frameData) => {
+  const response = await api.post('/classify/frame', {
+    frame: frameData
+  });
+  
+  return response.data.data;
+};
+
+export const classifyVideo = async (videoFile) => {
+  const formData = new FormData();
+  formData.append('file', videoFile);
+  
+  const response = await api.post('/classify/video', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  
+  return response.data.data;
+};
 
 export default api; 
