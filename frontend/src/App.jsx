@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { useAppState } from './contexts/AppStateContext';
+import { useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import useWebcam from './hooks/useWebcam';
 import useVideoFileProcessor from './hooks/useVideoFileProcessor';
 import classificationService from './services/classificationService';
+import Login from './pages/Login';
+import Admin from './pages/Admin';
+import Profile from './pages/Profile';
+import Navigation from './components/Navigation';
+import ProtectedRoute from './components/ProtectedRoute';
 
-function App() {
+function MainApp() {
   const { state, dispatch } = useAppState();
+  const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState(null);
   
   // Initialize hooks
@@ -79,121 +87,157 @@ function App() {
     };
   }, [cleanupVideo, stopWebcam]);
 
+  if (!user) {
+    return <Login />;
+  }
+
+  // Get current path
+  const path = window.location.pathname;
+
+  if (path === '/admin') {
+    return (
+      <ProtectedRoute requireAdmin>
+        <Admin />
+      </ProtectedRoute>
+    );
+  }
+
+  if (path === '/profile') {
+    return (
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    );
+  }
+
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Food Freshness Detection</h1>
-      
-      {/* Input Type Selection */}
-      <div className="mb-4">
-        <button
-          onClick={() => dispatch({ type: 'SET_INPUT_TYPE', payload: 'image' })}
-          className={`mr-2 px-4 py-2 rounded ${state.inputType === 'image' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        >
-          Image
-        </button>
-        <button
-          onClick={() => dispatch({ type: 'SET_INPUT_TYPE', payload: 'video' })}
-          className={`mr-2 px-4 py-2 rounded ${state.inputType === 'video' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        >
-          Video
-        </button>
-        <button
-          onClick={() => dispatch({ type: 'SET_INPUT_TYPE', payload: 'webcam' })}
-          className={`px-4 py-2 rounded ${state.inputType === 'webcam' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        >
-          Webcam
-        </button>
+    <div className="min-h-screen bg-gray-100">
+      <Navigation />
+      <div className="container mx-auto p-4">
+        <div className="mb-4">
+          <h1 className="text-2xl font-bold">Food Freshness Detection</h1>
+        </div>
+        
+        {/* Input Type Selection */}
+        <div className="mb-4">
+          <button
+            onClick={() => dispatch({ type: 'SET_INPUT_TYPE', payload: 'image' })}
+            className={`mr-2 px-4 py-2 rounded ${state.inputType === 'image' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          >
+            Image
+          </button>
+          <button
+            onClick={() => dispatch({ type: 'SET_INPUT_TYPE', payload: 'video' })}
+            className={`mr-2 px-4 py-2 rounded ${state.inputType === 'video' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          >
+            Video
+          </button>
+          <button
+            onClick={() => dispatch({ type: 'SET_INPUT_TYPE', payload: 'webcam' })}
+            className={`px-4 py-2 rounded ${state.inputType === 'webcam' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          >
+            Webcam
+          </button>
+        </div>
+
+        {/* File Input */}
+        {state.inputType === 'image' || state.inputType === 'video' ? (
+          <div className="mb-4">
+            <input
+              type="file"
+              accept={state.inputType === 'image' ? 'image/*' : 'video/*'}
+              onChange={handleFileSelect}
+              className="block w-full"
+            />
+          </div>
+        ) : null}
+
+        {/* Webcam Controls */}
+        {state.inputType === 'webcam' && (
+          <div className="mb-4">
+            {!isWebcamActive ? (
+              <button
+                onClick={handleWebcamStart}
+                className="bg-green-500 text-white px-4 py-2 rounded"
+              >
+                Start Webcam
+              </button>
+            ) : (
+              <button
+                onClick={handleWebcamStop}
+                className="bg-red-500 text-white px-4 py-2 rounded"
+              >
+                Stop Webcam
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Video Controls */}
+        {state.inputType === 'video' && selectedFile && (
+          <div className="mb-4">
+            {!isVideoPlaying ? (
+              <button
+                onClick={handleVideoStart}
+                className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+              >
+                Start Processing
+              </button>
+            ) : (
+              <button
+                onClick={handleVideoStop}
+                className="bg-red-500 text-white px-4 py-2 rounded"
+              >
+                Stop Processing
+              </button>
+            )}
+            {duration > 0 && (
+              <div className="mt-2">
+                Progress: {Math.round(currentTime)}s / {Math.round(duration)}s
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Error Display */}
+        {state.error && (
+          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+            {state.error}
+          </div>
+        )}
+
+        {/* Webcam Error */}
+        {webcamError && (
+          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+            {webcamError}
+          </div>
+        )}
+
+        {/* Results Display */}
+        {state.classificationResult && (
+          <div className="mt-4 p-4 bg-gray-100 rounded">
+            <h2 className="text-xl font-bold mb-2">Classification Result</h2>
+            <p>Status: {state.classificationResult.classification}</p>
+            <p>Confidence: {(state.classificationResult.confidence * 100).toFixed(2)}%</p>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {state.isProcessing && (
+          <div className="mt-4">
+            Processing...
+          </div>
+        )}
       </div>
-
-      {/* File Input */}
-      {state.inputType === 'image' || state.inputType === 'video' ? (
-        <div className="mb-4">
-          <input
-            type="file"
-            accept={state.inputType === 'image' ? 'image/*' : 'video/*'}
-            onChange={handleFileSelect}
-            className="block w-full"
-          />
-        </div>
-      ) : null}
-
-      {/* Webcam Controls */}
-      {state.inputType === 'webcam' && (
-        <div className="mb-4">
-          {!isWebcamActive ? (
-            <button
-              onClick={handleWebcamStart}
-              className="bg-green-500 text-white px-4 py-2 rounded"
-            >
-              Start Webcam
-            </button>
-          ) : (
-            <button
-              onClick={handleWebcamStop}
-              className="bg-red-500 text-white px-4 py-2 rounded"
-            >
-              Stop Webcam
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Video Controls */}
-      {state.inputType === 'video' && selectedFile && (
-        <div className="mb-4">
-          {!isVideoPlaying ? (
-            <button
-              onClick={handleVideoStart}
-              className="bg-green-500 text-white px-4 py-2 rounded mr-2"
-            >
-              Start Processing
-            </button>
-          ) : (
-            <button
-              onClick={handleVideoStop}
-              className="bg-red-500 text-white px-4 py-2 rounded"
-            >
-              Stop Processing
-            </button>
-          )}
-          {duration > 0 && (
-            <div className="mt-2">
-              Progress: {Math.round(currentTime)}s / {Math.round(duration)}s
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Error Display */}
-      {state.error && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-          {state.error}
-        </div>
-      )}
-
-      {/* Webcam Error */}
-      {webcamError && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-          {webcamError}
-        </div>
-      )}
-
-      {/* Results Display */}
-      {state.classificationResult && (
-        <div className="mt-4 p-4 bg-gray-100 rounded">
-          <h2 className="text-xl font-bold mb-2">Classification Result</h2>
-          <p>Status: {state.classificationResult.classification}</p>
-          <p>Confidence: {(state.classificationResult.confidence * 100).toFixed(2)}%</p>
-        </div>
-      )}
-
-      {/* Loading State */}
-      {state.isProcessing && (
-        <div className="mt-4">
-          Processing...
-        </div>
-      )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 }
 
