@@ -7,7 +7,7 @@ from ultralytics import YOLO
 
 
 class Classifier:
-    def __init__(self, model_path=r'D:\nam2\thpthtttnt\Full\ai-sys\backend\models\best.pt'):
+    def __init__(self, model_path='models/best.pt'):
         """
         Initialize classifier with YOLOv8 model.
         """

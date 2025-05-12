@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.endpoints import classify, auth, admin  # Đảm bảo các file này được định nghĩa đúng
 from app.database._init_db import _init_db  # Sửa từ _init_db (bỏ dấu _)
 from app.core.logger import get_logger  # Import get_logger thay vì setup_logging
@@ -16,6 +17,15 @@ _init_db()
 app.include_router(classify.router, prefix="/classify", tags=["classification"])
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Khởi động ứng dụng với uvicorn (có thể chạy từ command line)
 if __name__ == "__main__":
