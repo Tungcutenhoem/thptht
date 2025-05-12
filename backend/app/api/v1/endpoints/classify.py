@@ -20,8 +20,13 @@ async def classify_image(file: UploadFile = File(...)):
     Classify a single image
     """
     try:
+        print(f"Received file: {file.filename}, content_type: {file.content_type}")
         contents = await file.read()
+        print(f"File size: {len(contents)} bytes")
+        
         result = classifier.predict_image(contents)
+        print(f"Classification result: {result}")
+        
         return {
             "status": "success",
             "data": {
@@ -31,6 +36,7 @@ async def classify_image(file: UploadFile = File(...)):
             }
         }
     except Exception as e:
+        print(f"Error in classify_image: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/frame")

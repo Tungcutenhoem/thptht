@@ -30,25 +30,34 @@ def resize_image(image: Union[Image.Image, bytes], target_size: Tuple[int, int] 
 
 def preprocess_image(image: Union[Image.Image, bytes, str]) -> Image.Image:
     """Preprocess image for model inference."""
-    if isinstance(image, bytes):
-        image = Image.open(io.BytesIO(image)).convert("RGB")
-    elif isinstance(image, str):
-        try:
-            # Nếu là base64 string
-            image_data = base64.b64decode(image)
-            image = Image.open(io.BytesIO(image_data)).convert("RGB")
-        except Exception:
-            # Nếu không phải base64, giả định là đường dẫn file
-            image = Image.open(image).convert("RGB")
-    elif isinstance(image, Image.Image):
-        image = image.convert("RGB")
-    else:
-        raise ValueError("Định dạng ảnh không hỗ trợ")
-    
-    # Resize image
-    image = resize_image(image)
-    
-    return image
+    try:
+        if isinstance(image, bytes):
+            image = Image.open(io.BytesIO(image)).convert("RGB")
+        elif isinstance(image, str):
+            try:
+                # Nếu là base64 string
+                image_data = base64.b64decode(image)
+                image = Image.open(io.BytesIO(image_data)).convert("RGB")
+            except Exception:
+                # Nếu không phải base64, giả định là đường dẫn file
+                image = Image.open(image).convert("RGB")
+        elif isinstance(image, Image.Image):
+            image = image.convert("RGB")
+        else:
+            raise ValueError("Định dạng ảnh không hỗ trợ")
+        
+        # Resize image
+        image = resize_image(image)
+        
+        # Convert to numpy array and back to ensure proper format
+        image = np.array(image)
+        image = Image.fromarray(image)
+        
+        print(f"Image size after preprocessing: {image.size}")
+        return image
+    except Exception as e:
+        print(f"Error in preprocess_image: {str(e)}")
+        raise ValueError(f"Failed to preprocess image: {str(e)}")
 
 def image_to_bytes(image: Image.Image, format: str = 'JPEG') -> bytes:
     """Convert PIL Image to bytes."""

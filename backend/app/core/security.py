@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Union
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from app.models.user import User
+# from app.models.user import User
 from app.core.config import settings  # Lấy các cấu hình từ file config (chẳng hạn như SECRET_KEY)
 
 # Sử dụng Passlib để mã hóa và kiểm tra mật khẩu
@@ -41,13 +41,11 @@ def verify_access_token(token: str) -> dict:
         return None
 
 # Hàm lấy user từ token (dùng trong xác thực)
-def get_user_from_token(db, token: str) -> Union[User, None]:
+def get_user_from_token(token: str) -> dict:
     try:
         payload = verify_access_token(token)
         if payload is None:
             return None
-        user_id = payload.get("sub")  # 'sub' là ID của người dùng trong payload
-        user = db.query(User).filter(User.id == user_id).first()
-        return user
+        return payload
     except JWTError:
         return None
