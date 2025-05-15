@@ -9,3 +9,9 @@ opencv-python>=4.5.0
 pandas>=1.3.0
 ultralytics>=8.0.0  # for YOLOv5
 pytest>=7.0.0  # for testing
+python-jose>=3.3.0
+pydantic[email]>=1.8.0
+mysqlclient>=2.0.0
+passlib>=1.7.4
+pydantic-settings>=2.0.0
+bcrypt==3.2.0

@@ -10,14 +10,14 @@ class ClassificationResultBase(BaseModel):
     created_at: datetime  # Thời gian phân loại được tạo ra
 
     class Config:
-        rom_attributes = True # Điều này cho phép Pydantic làm việc với các đối tượng SQLAlchemy (ORM)
+        from_attributes = True # Điều này cho phép Pydantic làm việc với các đối tượng SQLAlchemy (ORM)
 
 class ClassificationResultResponse(ClassificationResultBase):
     # Kết quả trả về khi người dùng yêu cầu danh sách phân loại
     id: int  # ID của kết quả phân loại trong cơ sở dữ liệu
 
     class Config:
-        rom_attributes = True # Đảm bảo rằng dữ liệu từ ORM được chuyển đổi đúng
+        from_attributes = True # Đảm bảo rằng dữ liệu từ ORM được chuyển đổi đúng
 
 class ClassificationResultCreate(BaseModel):
     # Được sử dụng khi tạo mới một kết quả phân loại
@@ -26,7 +26,7 @@ class ClassificationResultCreate(BaseModel):
     confidence: float
 
     class Config:
-        rom_attributes = True
+        from_attributes = True
 
 class ClassificationResultUpdate(BaseModel):
     # Được sử dụng khi cập nhật kết quả phân loại
@@ -34,4 +34,4 @@ class ClassificationResultUpdate(BaseModel):
     confidence: Optional[float] = None
 
     class Config:
-        rom_attributes = True
+        from_attributes = True

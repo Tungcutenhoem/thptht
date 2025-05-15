@@ -215,10 +215,10 @@ function MainApp() {
 
         {/* Results Display */}
         {state.classificationResult && (
-          <div className="mt-4 p-4 bg-gray-100 rounded">
+          <div className="mt-4 p-4 bg-white rounded shadow">
             <h2 className="text-xl font-bold mb-2">Classification Result</h2>
-            <p>Status: {state.classificationResult.classification}</p>
-            <p>Confidence: {(state.classificationResult.confidence * 100).toFixed(2)}%</p>
+            <p className="text-lg">Status: {state.classificationResult.data.classification}</p>
+            <p className="text-lg">Confidence: {state.classificationResult.data.confidence}%</p>
           </div>
         )}
 

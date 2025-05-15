@@ -6,9 +6,10 @@ class UserCreate(BaseModel):
     username: str  # Tên người dùng
     email: EmailStr  # Địa chỉ email người dùng
     password: str  # Mật khẩu người dùng
+    Role: str
 
     class Config:
-        rom_attributes = True # Cho phép chuyển đổi giữa Pydantic models và ORM models
+        from_attributes = True # Cho phép chuyển đổi giữa Pydantic models và ORM models
 
 # Schema dùng để đăng nhập người dùng
 class UserLogin(BaseModel):
@@ -16,7 +17,7 @@ class UserLogin(BaseModel):
     password: str  # Mật khẩu
 
     class Config:
-        rom_attributes = True
+        from_attributes = True
 
 # Schema trả về sau khi người dùng đăng nhập thành công (chứa token JWT)
 class Token(BaseModel):
@@ -28,6 +29,15 @@ class User(BaseModel):
     id: int  # ID người dùng
     username: str  # Tên người dùng
     email: EmailStr  # Địa chỉ email người dùng
+    Role: str
 
     class Config:
-        rom_attributes = True
+        from_attributes = True
+
+class UserOut(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+
+    class Config:
+        from_attributes = True 
