@@ -1,95 +1,188 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
-from typing import List
-import base64
+from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.services.classifier import Classifier
 from app.services.video_processor import VideoProcessor
-from app.services.utils import preprocess_image
-from pydantic import BaseModel
-
-class FrameData(BaseModel):
-    frame: str  # Base64 encoded image data
-
+import tempfile
+import imghdr
+import cv2
+import time
 router = APIRouter()
 classifier = Classifier()
-video_processor = VideoProcessor()
+video_processor = VideoProcessor(frame_skip=0)  # Set frame_skip to 1 to capture every frame for 60fps
 
-@router.post("/image")
-async def classify_image(file: UploadFile = File(...)):
-    """
-    Classify a single image
-    """
+@router.post("/analyze_image")
+async def analyze_image(file: UploadFile = File(...)):
     try:
-        print(f"Received file: {file.filename}, content_type: {file.content_type}")
         contents = await file.read()
-        print(f"File size: {len(contents)} bytes")
-        
+
+        # Ghi ra file tạm để phân biệt định dạng
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file.filename.split('.')[-1]}") as temp:
+            temp.write(contents)
+            temp_path = temp.name
+
+        # Kiểm tra xem có phải ảnh không
+        if not imghdr.what(temp_path):
+            raise HTTPException(status_code=400, detail="File không phải ảnh.")
+
+        # Đọc và tiền xử lý ảnh
         result = classifier.predict_image(contents)
-        print(f"Classification result: {result}")
-        
+
         return {
+            "type": "image",
             "status": "success",
             "data": {
                 "classification": result["classification"],
                 "confidence": result["confidence"],
-                "processedAt": result.get("processedAt")
+                "bounding_box": result.get('boxes', [])
             }
         }
-    except Exception as e:
-        print(f"Error in classify_image: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/frame")
-async def classify_frame(frame_data: FrameData):
-    """
-    Classify a single frame from video/webcam
-    """
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi xử lý: {str(e)}")
+
+
+# ---------------------- Xử lý video từ camera ----------------------
+
+@router.post("/analyze_camera")
+async def analyze_camera():
     try:
-        # Remove data URL prefix if present
-        if frame_data.frame.startswith('data:image'):
-            frame_data.frame = frame_data.frame.split(',')[1]
-        
-        # Decode base64
-        try:
-            image_data = base64.b64decode(frame_data.frame)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail="Invalid base64 image data")
+        # Mở camera (thường camera mặc định là chỉ số 0)
+        cap = cv2.VideoCapture(0)
 
-        result = classifier.predict_image(image_data)
-        return {
-            "status": "success",
-            "data": {
+        if not cap.isOpened():
+            raise HTTPException(status_code=400, detail="Không thể mở camera")
+
+        # Cài đặt frame rate mong muốn (60fps)
+        cap.set(cv2.CAP_PROP_FPS, 60)
+
+        # Kiểm tra frame rate thực tế từ camera
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        print(f"Camera đang chạy ở {fps} FPS")
+
+        frame_count = 0
+        results = []
+
+        while True:
+            start_time = time.time()  # Ghi lại thời gian bắt đầu mỗi frame
+
+            # Đọc một frame từ video
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Chuyển frame thành RGB
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            # Tiền xử lý frame cho mô hình
+            processed_frame = video_processor.process_frame(frame_rgb)
+
+            # Dự đoán phân loại cho frame
+            result = classifier.predict_image(processed_frame)
+            results.append({
+                "frameIndex": frame_count,
                 "classification": result["classification"],
-                "confidence": result["confidence"],
-                "processedAt": result.get("processedAt")
-            }
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+                "confidence": result["confidence"]
+            })
+            frame_count += 1
 
-@router.post("/video")
-async def classify_video(file: UploadFile = File(...)):
-    """
-    Process video file and return classifications for key frames
-    """
+            # Hiển thị kết quả lên cửa sổ video
+            cv2.putText(frame, f"Class: {result['classification']} Confidence: {result['confidence']:.2f}",
+                        (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            cv2.imshow("Camera Stream", frame)
+
+            # Tính toán thời gian xử lý và điều chỉnh delay để duy trì 60fps
+            elapsed_time = time.time() - start_time
+            delay_time = max(1.0 / 60 - elapsed_time, 0)  # Đảm bảo không có độ trễ âm
+            time.sleep(delay_time)  # Điều chỉnh độ trễ để duy trì 60fps
+
+            # Dừng khi nhấn phím 'q'
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+        return {
+            "type": "camera",
+            "status": "success",
+            "totalFramesProcessed": len(results),
+            "results": results
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi xử lý: {str(e)}")
+
+@router.post("/analyze_video")
+async def analyze_video(file: UploadFile = File(...)):
     try:
         contents = await file.read()
-        # Extract first frame for testing
-        frame = video_processor.extract_frame_from_bytes(contents)
-        if frame is None:
-            raise HTTPException(status_code=400, detail="Invalid video file")
-            
-        # Process frame
-        processed_frame = video_processor.process_frame(frame)
-        result = classifier.predict_image(processed_frame)
-        
-        return {
-            "status": "success",
-            "data": {
+
+        # Ghi ra file tạm để phân biệt định dạng
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file.filename.split('.')[-1]}") as temp:
+            temp.write(contents)
+            temp_path = temp.name
+
+        # Mở video
+        cap = cv2.VideoCapture(temp_path)
+
+        if not cap.isOpened():
+            raise HTTPException(status_code=400, detail="Không thể mở video")
+
+        # Cài đặt frame rate mong muốn (60fps)
+        cap.set(cv2.CAP_PROP_FPS, 60)
+
+        # Kiểm tra frame rate thực tế từ video
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        print(f"Video đang chạy ở {fps} FPS")
+
+        frame_count = 0
+        results = []
+
+        while True:
+            start_time = time.time()  # Ghi lại thời gian bắt đầu mỗi frame
+
+            # Đọc một frame từ video
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Chuyển frame thành RGB
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            # Tiền xử lý frame cho mô hình
+            processed_frame = video_processor.process_frame(frame_rgb)
+
+            # Dự đoán phân loại cho frame
+            result = classifier.predict_image(processed_frame)
+            results.append({
+                "frameIndex": frame_count,
                 "classification": result["classification"],
-                "confidence": result["confidence"],
-                "processedAt": result.get("processedAt")
-            }
+                "confidence": result["confidence"]
+            })
+            frame_count += 1
+
+            # Hiển thị kết quả lên cửa sổ video
+            cv2.putText(frame, f"Class: {result['classification']} Confidence: {result['confidence']:.2f}",
+                        (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            cv2.imshow("Video Stream", frame)
+
+            # Tính toán thời gian xử lý và điều chỉnh delay để duy trì 60fps
+            elapsed_time = time.time() - start_time
+            delay_time = max(1.0 / 60 - elapsed_time, 0)  # Đảm bảo không có độ trễ âm
+            time.sleep(delay_time)  # Điều chỉnh độ trễ để duy trì 60fps
+
+            # Dừng khi nhấn phím 'q'
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+        return {
+            "type": "video",
+            "status": "success",
+            "totalFramesProcessed": len(results),
+            "results": results
         }
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
+        raise HTTPException(status_code=500, detail=f"Lỗi xử lý: {str(e)}")

@@ -29,14 +29,14 @@ class Classifier:
         Predict classification for a single image.
         """
         try:
-            print("Preprocessing image...")
+            # print("Preprocessing image...")
             processed_image = preprocess_image(image)
-            print(f"Image preprocessed successfully. Size: {processed_image.size}")
+            # print(f"Image preprocessed successfully. Size: {processed_image.size}")
 
-            print("Running model prediction...")
+            # print("Running model prediction...")
             results = self.model(processed_image)
             result = results[0]  # Lấy kết quả đầu tiên
-            print(f"Raw model results: {result}")
+            # print(f"Raw model results: {result}")
 
             if not result.boxes or len(result.boxes.cls) == 0:
                 print("Không phát hiện đối tượng.")

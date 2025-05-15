@@ -4,28 +4,52 @@ from datetime import timedelta
 from app.schemas.auth import Token
 from app.core.security import verify_password, create_access_token
 from app.core.config import settings
+from app import schemas, models
+from sqlalchemy.orm import Session
+from app.database.session import get_db
+from app.core.security import hash_password
 
 router = APIRouter()
 
-# Mock user data
-MOCK_USER = {
-    "username": "admin",
-    "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"  # password: "password"
-}
 
-@router.post("/login", response_model=Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    # Mock authentication
-    if form_data.username != MOCK_USER["username"] or not verify_password(form_data.password, MOCK_USER["hashed_password"]):
+
+@router.post("/login/user", response_model=Token)
+def login_user(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    # Truy vấn user từ database
+    user = db.query(models.user.User).filter(models.user.User.username == form_data.username).first()
+    
+    if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
+    
+    role = user.role
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": form_data.username}, expires_delta=access_token_expires
+        data={"sub": user.username, "role": "user"}, expires_delta=access_token_expires
     )
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/register", response_model=schemas.auth.UserOut)
+def register(user_data: schemas.auth.UserCreate, db: Session = Depends(get_db)):
+    # Check if user already exists
+    if db.query(models.user.User).filter(models.user.User.email == user_data.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    new_user = models.user.User(
+        username=user_data.username,
+        email=user_data.email,
+        hashed_password=hash_password(user_data.password)
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user

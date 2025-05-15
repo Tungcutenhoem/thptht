@@ -6,14 +6,17 @@ from PIL import Image
 import io
 import tempfile
 import os
+from typing import List, Dict
+from app.services.classifier import Classifier
+
 
 class VideoProcessor:
-    def __init__(self, frame_skip: int = 5):
+    def __init__(self, frame_skip: int = 0):
         """
         Initialize video processor.
         
         Args:
-            frame_skip: Number of frames to skip between processing
+            frame_skip: Number of frames to skip between processing, set to 0 for 60fps.
         """
         self.frame_skip = frame_skip
 
@@ -35,11 +38,12 @@ class VideoProcessor:
             if not ret:
                 break
                 
-            if frame_count % self.frame_skip == 0:
+            # Nếu bạn muốn xử lý toàn bộ các frame mà không bỏ qua
+            if self.frame_skip == 0:
                 # Convert BGR to RGB
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 yield frame_rgb, frame_count
-                
+            
             frame_count += 1
             
         cap.release()
@@ -93,4 +97,4 @@ class VideoProcessor:
             return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         finally:
             # Clean up temporary file
-            os.unlink(temp_path) 
+            os.unlink(temp_path)
