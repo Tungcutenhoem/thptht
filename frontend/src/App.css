@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f7f9fc;
+  color: #333;
+}
+
+.App {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.App h1 {
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #1a237e;
+}
+
+h2 {
+  font-size: 20px;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+button {
+  background-color: #1976d2;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  padding: 10px 16px;
+  margin: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #1565c0;
+}
+
+input[type="file"] {
+  margin-top: 12px;
+}
+
+hr {
+  margin: 24px 0;
+  border: 0;
+  border-top: 1px solid #ccc;
+}

@@ -46,19 +46,24 @@ function Profile() {
   return (
     <div className="min-h-screen bg-gray-100">
       <Navigation />
-      
+
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Profile Settings</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Cài đặt thông tin cá nhân</h2>
               {!isEditing && (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  className="bg-[#3dd9e6] text-white px-4 py-2 rounded hover:bg-[#0b1f3a] flex items-center justify-center"
                 >
-                  Edit Profile
+                  <img
+                    src="/src/public/edit.png"
+                    alt="Edit"
+                    className="h-6 w-6 object-contain"
+                  />
                 </button>
+
               )}
             </div>
 
@@ -76,16 +81,16 @@ function Profile() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Username</label>
+                <label className="block text-sm font-medium text-gray-700">Tên người dùng</label>
                 <input
                   type="text"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  disabled={!isEditing}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border-2 border-gray-00 shadow-sm focus:border-blue-600 focus:ring-blue-600"
                 />
               </div>
+
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">Email</label>
@@ -94,45 +99,46 @@ function Profile() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  disabled={!isEditing}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border-2 border-gray-00 shadow-sm focus:border-blue-600 focus:ring-blue-600"
                 />
               </div>
+
 
               {isEditing && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Current Password</label>
+                    <label className="block text-sm font-medium text-gray-700">Mật khẩu hiện tại</label>
                     <input
                       type="password"
                       name="currentPassword"
                       value={formData.currentPassword}
                       onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border-2 border-gray-00 shadow-sm focus:border-blue-600 focus:ring-blue-600"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">New Password</label>
+                    <label className="block text-sm font-medium text-gray-700">Mật khẩu mới</label>
                     <input
                       type="password"
                       name="newPassword"
                       value={formData.newPassword}
                       onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border-2 border-gray-00 shadow-sm focus:border-blue-600 focus:ring-blue-600"
                     />
                   </div>
 
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                    <label className="block text-sm font-medium text-gray-700">Xác nhận mật khẩu mới</label>
                     <input
                       type="password"
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border-2 border-gray-00 shadow-sm focus:border-blue-600 focus:ring-blue-600"
                     />
                   </div>
+
                 </>
               )}
 
@@ -143,13 +149,13 @@ function Profile() {
                     onClick={() => setIsEditing(false)}
                     className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
                   >
-                    Cancel
+                    Hủy thay đổi
                   </button>
                   <button
                     type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    className="bg-[#3dd9e6] text-white px-4 py-2 rounded hover:bg-[#0b1f3a]"
                   >
-                    Save Changes
+                    Lưu thay đổi
                   </button>
                 </div>
               )}

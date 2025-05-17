@@ -45,10 +45,6 @@ const useWebcam = (frameRate = 5) => {
   const videoRef = useRef(null);
   const { startPolling, stopPolling, isPolling } = usePolling(frameRate);
 
-  /**
-   * Start the webcam stream
-   * @returns {Promise<void>}
-   */
   const startWebcam = useCallback(async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -57,24 +53,30 @@ const useWebcam = (frameRate = 5) => {
           height: { ideal: 720 },
         },
       });
+
       setStream(mediaStream);
       setIsActive(true);
       setError(null);
 
-      // Create video element for frame capture
-      const video = document.createElement('video');
-      video.srcObject = mediaStream;
-      video.play();
-      videoRef.current = video;
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current.play().catch(err => {
+            console.error("Lỗi khi play video:", err);
+          });
+        };
+      } else {
+        console.warn("⚠ videoRef chưa sẵn sàng khi startWebcam");
+      }
     } catch (err) {
-      setError('Failed to access webcam: ' + err.message);
+      setError('Không thể truy cập webcam: ' + err.message);
       setIsActive(false);
     }
   }, []);
 
-  /**
-   * Stop the webcam stream and cleanup resources
-   */
+
+
   const stopWebcam = useCallback(() => {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
@@ -83,18 +85,13 @@ const useWebcam = (frameRate = 5) => {
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null;
-      videoRef.current = null;
     }
     stopPolling();
   }, [stream, stopPolling]);
 
-  /**
-   * Capture a frame from the webcam stream
-   * @returns {Promise<string|null>} Base64 encoded image data or null if capture fails
-   */
   const captureFrame = useCallback(() => {
     if (!videoRef.current) return null;
-    
+
     return new Promise((resolve) => {
       const video = videoRef.current;
       const canvas = document.createElement('canvas');
@@ -108,22 +105,15 @@ const useWebcam = (frameRate = 5) => {
     });
   }, []);
 
-  /**
-   * Start processing frames from the webcam
-   */
   const startProcessing = useCallback(() => {
-    if (!videoRef.current || isActive) return;
+    if (!videoRef.current || !isActive) return;
     startPolling(captureFrame);
   }, [captureFrame, isActive, startPolling]);
 
-  /**
-   * Stop processing frames
-   */
   const stopProcessing = useCallback(() => {
     stopPolling();
   }, [stopPolling]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       stopWebcam();
@@ -135,6 +125,7 @@ const useWebcam = (frameRate = 5) => {
     error,
     isActive,
     isPolling,
+    videoRef,
     startWebcam,
     stopWebcam,
     startProcessing,
@@ -142,4 +133,4 @@ const useWebcam = (frameRate = 5) => {
   };
 };
 
-export default useWebcam; 
+export default useWebcam;

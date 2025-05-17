@@ -13,18 +13,18 @@ function Sidebar() {
   ];
 
   return (
-    <div className="bg-gray-800 text-white w-64 min-h-screen p-4">
+    <div className="bg-blue-900 text-white w-64 min-h-screen p-4">
       <div className="mb-8">
         <h2 className="text-xl font-bold">Food Freshness</h2>
       </div>
-      
+
       <nav>
         <ul className="space-y-2">
           {menuItems.map((item) => (
             <li key={item.path}>
               <a
                 href={item.path}
-                className="flex items-center space-x-2 p-2 rounded hover:bg-gray-700"
+                className="flex items-center space-x-2 p-2 rounded hover:bg-blue-800"
               >
                 <span>{item.icon}</span>
                 <span>{item.label}</span>
@@ -44,6 +44,7 @@ function Sidebar() {
         </button>
       </div>
     </div>
+
   );
 }
 
