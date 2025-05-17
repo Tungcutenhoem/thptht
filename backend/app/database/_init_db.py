@@ -1,4 +1,3 @@
-
 from app.database.session import engine
 from app.models.base import Base
 from app.models import user, classification_result

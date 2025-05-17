@@ -1,11 +1,8 @@
 import os
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # Thông tin cơ sở dữ liệu
-    DATABASE_URL: str = "postgresql://user:password@localhost/dbname"
-
     # Thông tin JWT
     SECRET_KEY: str = "your_secret_key"
     ALGORITHM: str = "HS256"

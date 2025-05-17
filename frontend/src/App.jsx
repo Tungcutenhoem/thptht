@@ -361,14 +361,14 @@ function MainApp() {
         </div>
       )}
 
-      {/* Classification Result */}
-      {state.classificationResult && (
-        <div className="mt-4 p-4 bg-gray-100 rounded max-w-xl mx-auto text-center">
-          <h2 className="text-xl font-bold mb-2">Classification Result</h2>
-          <p>Status: {state.classificationResult.classification}</p>
-          <p>Confidence: {(state.classificationResult.confidence * 100).toFixed(2)}%</p>
-        </div>
-      )}
+        {/* Results Display */}
+        {state.classificationResult && (
+          <div className="mt-4 p-4 bg-gray-100 rounded">
+            <h2 className="text-xl font-bold mb-2">Classification Result</h2>
+            <p>Status: {state.classificationResult.classification}</p>
+            <p>Confidence: {(state.classificationResult.confidence * 100).toFixed(2)}%</p>
+          </div>
+        )}
 
       {/* Loading */}
       {state.isProcessing && (

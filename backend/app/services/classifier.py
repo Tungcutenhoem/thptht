@@ -1,62 +1,62 @@
 import torch
 import numpy as np
 from PIL import Image
-from typing import Dict, Union
-from .utils import preprocess_image
+from typing import Dict, Union, List
+from .utils import preprocess_image  # Bạn cần đảm bảo hàm này trả về ảnh định dạng phù hợp (PIL hoặc ndarray)
 from ultralytics import YOLO
+import os
 
 
 class Classifier:
     def __init__(self, model_path='models/best.pt'):
         """
-        Initialize classifier with YOLOv5 model.
-
-        Args:
-            model_path: Path to the model weights file
+        Initialize classifier with YOLOv8 model.
         """
         try:
-            self.model = YOLO(model_path)  # Load custom model
+            # Get the absolute path to the model file
+            current_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            model_path = os.path.join(current_dir, model_path)
+            print(f"Loading model from: {model_path}")
+            self.model = YOLO(model_path)
         except Exception as e:
-            print(f"Failed to load custom model: {e}")
-            print("Loading default YOLOv5s model...")
-            self.model = YOLO('backend/yolov5s.pt')  # Make sure the fallback model path is correct
+            print(f"Failed to load model: {e}")
+            raise e
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model.to(self.device)
 
     def predict_image(self, image: Union[bytes, str, Image.Image]) -> Dict[str, Union[str, float]]:
         """
         Predict classification for a single image.
-
-        Args:
-            image: Image in bytes, base64 string, or PIL Image format
-
-        Returns:
-            Dictionary containing classification and confidence
         """
         try:
-            # Preprocess image
+            # print("Preprocessing image...")
             processed_image = preprocess_image(image)
+            # print(f"Image preprocessed successfully. Size: {processed_image.size}")
 
-            # Run inference
-            results = self.model(processed_image, size=640)
+            # print("Running model prediction...")
+            results = self.model(processed_image)
+            result = results[0]  # Lấy kết quả đầu tiên
+            # print(f"Raw model results: {result}")
 
-            # Get predictions
-            predictions = results.pandas().xyxy[0]
+            if not result.boxes or len(result.boxes.cls) == 0:
+                print("Không phát hiện đối tượng.")
+                return {"classification": "Không xác định", "confidence": 0.0}
 
-            if predictions.empty:
-                return {
-                    "classification": "Không xác định",
-                    "confidence": 0.0
-                }
+            # Lấy class index và confidence của object đầu tiên
+            cls_id = int(result.boxes.cls[0])
+            confidence = float(result.boxes.conf[0])
+            class_name = self.model.names[cls_id]
 
-            # Get top prediction
-            top_pred = predictions.iloc[0]
-
-            return {
-                "classification": top_pred['name'],
-                "confidence": round(float(top_pred['confidence']), 2)
+            output = {
+                "classification": class_name,
+                "confidence": round(confidence * 100, 2)  # Convert to percentage
             }
+
+            print(f"[predict_image] Kết quả: {output}")
+            return output
+
         except Exception as e:
+            print(f"[predict_image] Lỗi: {str(e)}")
             return {
                 "classification": "Error",
                 "confidence": 0.0,
@@ -65,60 +65,49 @@ class Classifier:
 
     def predict_frame(self, frame: np.ndarray) -> Dict[str, Union[str, float]]:
         """
-        Predict classification for a video frame.
-
-        Args:
-            frame: numpy array of frame (RGB format)
-
-        Returns:
-            Dictionary containing classification and confidence
+        Predict classification for a video frame (ndarray).
         """
         try:
-            # Convert numpy array to PIL Image
             image = Image.fromarray(frame)
-
-            # Use predict_image method
             return self.predict_image(image)
         except Exception as e:
+            print(f"[predict_frame] Lỗi: {e}")
             return {
                 "classification": "Error",
                 "confidence": 0.0,
                 "error": str(e)
             }
 
-    def batch_predict(self, images: list[Union[bytes, str, Image.Image]]) -> list[Dict[str, Union[str, float]]]:
+    def batch_predict(self, images: List[Union[bytes, str, Image.Image]]) -> List[Dict[str, Union[str, float]]]:
         """
-        Batch predict multiple images.
-
-        Args:
-            images: List of images in bytes, base64 string, or PIL Image format
-
-        Returns:
-            List of prediction results
+        Predict multiple images.
         """
         try:
-            # Preprocess all images
             processed_images = [preprocess_image(img) for img in images]
 
-            # Run batch inference
-            results = self.model(processed_images, size=640)
+            results = self.model(processed_images)
+            outputs = []
 
-            predictions = []
-            for result in results.pandas().xyxy:
-                if result.empty:
-                    predictions.append({
-                        "classification": "Không xác định",
-                        "confidence": 0.0
-                    })
-                else:
-                    top_pred = result.iloc[0]
-                    predictions.append({
-                        "classification": top_pred['name'],
-                        "confidence": round(float(top_pred['confidence']), 2)
-                    })
+            for result in results:
+                if not result.boxes or len(result.boxes.cls) == 0:
+                    outputs.append({"classification": "Không xác định", "confidence": 0.0})
+                    continue
 
-            return predictions
+                cls_id = int(result.boxes.cls[0])
+                confidence = float(result.boxes.conf[0])
+                class_name = self.model.names[cls_id]
+
+                output = {
+                    "classification": class_name,
+                    "confidence": round(confidence, 2)
+                }
+                outputs.append(output)
+                print(f"[batch_predict] Kết quả: {output}")
+
+            return outputs
+
         except Exception as e:
+            print(f"[batch_predict] Lỗi: {e}")
             return [{
                 "classification": "Error",
                 "confidence": 0.0,

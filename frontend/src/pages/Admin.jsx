@@ -1,9 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
 
 function Admin() {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [stats, setStats] = useState({ total_users: 0, total_classifications: 0 });
+  const [data, setData] = useState([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get('/admin/stats');
+        setStats(response.data);
+      } catch (err) {
+        setError('Failed to fetch stats.');
+      }
+    };
+
+    const fetchData = async () => {
+      try {
+        const response = await api.get('/admin/data');
+        setData(response.data);
+      } catch (err) {
+        setError('Failed to fetch data.');
+      }
+    };
+
+    fetchStats();
+    fetchData();
+  }, []);
 
   // Mock data
   const users = [
@@ -20,7 +47,7 @@ function Admin() {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div className="bg-white p-4 rounded-lg shadow">
         <h3 className="font-medium">Total Users</h3>
-        <p className="text-2xl">{users.length}</p>
+        <p className="text-2xl">{stats.total_users}</p>
       </div>
       <div className="bg-white p-4 rounded-lg shadow">
         <h3 className="font-medium">Active Sessions</h3>

@@ -2,11 +2,14 @@ from datetime import datetime, timedelta
 from typing import Union
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from app.models.user import User
+# from app.models.user import User
 from app.core.config import settings  # Lấy các cấu hình từ file config (chẳng hạn như SECRET_KEY)
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 
 # Sử dụng Passlib để mã hóa và kiểm tra mật khẩu
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login/user")
 
 # Cấu hình cho JWT
 SECRET_KEY = settings.SECRET_KEY  # Key bí mật để tạo JWT
@@ -41,13 +44,22 @@ def verify_access_token(token: str) -> dict:
         return None
 
 # Hàm lấy user từ token (dùng trong xác thực)
-def get_user_from_token(db, token: str) -> Union[User, None]:
+def get_user_from_token(token: str) -> dict:
     try:
         payload = verify_access_token(token)
         if payload is None:
             return None
-        user_id = payload.get("sub")  # 'sub' là ID của người dùng trong payload
-        user = db.query(User).filter(User.id == user_id).first()
-        return user
+        return payload
     except JWTError:
         return None
+    
+
+def admin_required(token: str = Depends(oauth2_scheme)):
+    user = get_user_from_token(token)
+    if not user or user["role"] != "admin":
+        raise HTTPException(    
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to perform this action"
+        )
+    return user
+

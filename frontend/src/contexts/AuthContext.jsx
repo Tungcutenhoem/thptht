@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -15,14 +16,18 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (userData) => {
-    // In a real app, this would validate with backend
-    const userWithToken = {
-      ...userData,
-      token: 'mock-token-' + Math.random().toString(36).substr(2)
-    };
-    setUser(userWithToken);
-    localStorage.setItem('user', JSON.stringify(userWithToken));
+  const login = async (userData) => {
+    try {
+      const response = await api.post('/auth/login', userData);
+      const { access_token } = response.data;
+      const userWithToken = { ...userData, token: access_token };
+      setUser(userWithToken);
+      localStorage.setItem('user', JSON.stringify(userWithToken));
+      localStorage.setItem('token', access_token);
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   };
 
   const logout = () => {

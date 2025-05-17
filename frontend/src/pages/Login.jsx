@@ -31,15 +31,7 @@ function Login() {
 
     try {
       setLoading(true);
-      // Mock API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simple mock login - in real app, this would call an API
-      login({ 
-        username, 
-        role: username === 'admin' ? 'admin' : 'user',
-        rememberMe 
-      });
+      await login({ username, password, rememberMe });
     } catch (err) {
       setError('Failed to login. Please try again.');
     } finally {
