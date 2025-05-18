@@ -34,7 +34,7 @@ export const classifyImage = async (imageFile) => {
   const formData = new FormData();
   formData.append('file', imageFile);
   
-  const response = await api.post('/classify/image', formData, {
+  const response = await api.post('/classify/analyze_image', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

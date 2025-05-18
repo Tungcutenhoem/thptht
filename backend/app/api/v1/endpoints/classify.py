@@ -2,9 +2,10 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.services.classifier import Classifier
 from app.services.video_processor import VideoProcessor
 import tempfile
-import imghdr
+from PIL import Image
 import cv2
 import time
+import io
 router = APIRouter()
 classifier = Classifier()
 video_processor = VideoProcessor(frame_skip=0)  # Set frame_skip to 1 to capture every frame for 60fps
@@ -20,7 +21,9 @@ async def analyze_image(file: UploadFile = File(...)):
             temp_path = temp.name
 
         # Kiểm tra xem có phải ảnh không
-        if not imghdr.what(temp_path):
+        try:
+            Image.open(io.BytesIO(contents))
+        except:
             raise HTTPException(status_code=400, detail="File không phải ảnh.")
 
         # Đọc và tiền xử lý ảnh

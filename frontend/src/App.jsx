@@ -2,9 +2,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useAppState } from './contexts/AppStateContext';
 import { useAuth } from './contexts/AuthContext';
 import { AuthProvider } from './contexts/AuthContext';
-import useWebcam from './hooks/useWebcam';
 import useVideoFileProcessor from './hooks/useVideoFileProcessor';
 import classificationService from './services/classificationService';
+import WebcamComponent from './components/WebcamComponent';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
@@ -30,16 +30,6 @@ function MainApp() {
       alert('Vui lòng thả một tệp ảnh!');
     }
   };
-  const {
-    startWebcam,
-    stopWebcam,
-    startProcessing: startWebcamProcessing,
-    stopProcessing: stopWebcamProcessing,
-    isActive: isWebcamActive,
-    error: webcamError,
-    videoRef,
-  } = useWebcam(5);
-
 
   const {
     loadVideo,
@@ -50,28 +40,6 @@ function MainApp() {
     duration,
     cleanup: cleanupVideo
   } = useVideoFileProcessor(5);
-
-  // Handle webcam controls
-  const handleWebcamStart = () => {
-    dispatch({ type: 'SET_INPUT_TYPE', payload: 'webcam' });
-
-    // Delay ngắn để React gắn videoRef xong
-    setTimeout(async () => {
-      try {
-        await startWebcam();           // Sau khi video đã tồn tại
-        startWebcamProcessing();
-      } catch (err) {
-        console.error("Không bật được webcam:", err);
-      }
-    }, 100); // 100ms là đủ để đảm bảo ref có
-  };
-
-
-  const handleWebcamStop = () => {
-    stopWebcamProcessing();
-    stopWebcam();
-    dispatch({ type: 'SET_INPUT_TYPE', payload: null });
-  };
 
   // Handle file selection
   const processFile = async (event) => {
@@ -114,9 +82,8 @@ function MainApp() {
   React.useEffect(() => {
     return () => {
       cleanupVideo();
-      stopWebcam();
     };
-  }, [cleanupVideo, stopWebcam]);
+  }, [cleanupVideo]);
 
   if (!user) {
     return <Login />;
@@ -292,26 +259,12 @@ function MainApp() {
 
                     {/* Webcam */}
                     {state.inputType === 'webcam' && (
-                      <div className="flex flex-col items-center space-y-4">
-                        {!isWebcamActive ? (
-                          <button onClick={handleWebcamStart} className="bg-green-500 text-white px-4 py-2 rounded">
-                            Start Webcam
-                          </button>
-                        ) : (
-                          <>
-                            <video
-                              ref={videoRef}
-                              autoPlay
-                              playsInline
-                              muted
-                              className="w-96 h-auto rounded shadow"
-                            />
-                            <button onClick={handleWebcamStop} className="bg-red-500 text-white px-4 py-2 rounded">
-                              Stop Webcam
-                            </button>
-                          </>
-                        )}
-                      </div>
+                      <WebcamComponent 
+                        onError={(error) => {
+                          console.error("Lỗi webcam:", error);
+                          dispatch({ type: 'SET_ERROR', payload: error });
+                        }}
+                      />
                     )}
 
                   </>
@@ -353,11 +306,6 @@ function MainApp() {
       {state.error && (
         <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-center">
           {state.error}
-        </div>
-      )}
-      {webcamError && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-center">
-          {webcamError}
         </div>
       )}
 
@@ -428,7 +376,7 @@ function MainApp() {
               <div className="text-pink-500 text-sm mb-2">★★★★★</div>
               <div className="text-blue-400 text-3xl text-right mt-2">❝</div>
               <p className="text-gray-700 text-sm">
-                “Tôi thường rất lo lắng khi mua thực phẩm ngoài chợ. Nhờ hệ thống này, tôi có thể kiểm tra nhanh độ tươi của rau củ chỉ bằng ảnh chụp. Thật sự rất tiện lợi và chính xác!”
+                "Tôi thường rất lo lắng khi mua thực phẩm ngoài chợ. Nhờ hệ thống này, tôi có thể kiểm tra nhanh độ tươi của rau củ chỉ bằng ảnh chụp. Thật sự rất tiện lợi và chính xác!"
               </p>
             </div>
 
@@ -438,7 +386,7 @@ function MainApp() {
               <div className="text-pink-500 text-sm mb-2">★★★★★</div>
               <div className="text-blue-400 text-3xl text-right mt-2">❝</div>
               <p className="text-gray-700 text-sm">
-                “Là chủ một chuỗi cửa hàng thực phẩm sạch, tôi rất cần một công cụ hỗ trợ kiểm định. Công nghệ AI trong hệ thống này đã giúp tôi tiết kiệm thời gian và nâng cao chất lượng kiểm tra.”
+                "Là chủ một chuỗi cửa hàng thực phẩm sạch, tôi rất cần một công cụ hỗ trợ kiểm định. Công nghệ AI trong hệ thống này đã giúp tôi tiết kiệm thời gian và nâng cao chất lượng kiểm tra."
               </p>
             </div>
 
@@ -448,7 +396,7 @@ function MainApp() {
               <div className="text-pink-500 text-sm mb-2">★★★★★</div>
               <div className="text-blue-400 text-3xl text-right mt-2">❝</div>
               <p className="text-gray-700 text-sm">
-                “Tôi tải ảnh quả cà chua vừa hái lên để thử, và kết quả rất bất ngờ — hệ thống còn chỉ ra độ chín và gợi ý thời gian sử dụng tốt nhất! Giao diện cũng rất thân thiện.”
+                "Tôi tải ảnh quả cà chua vừa hái lên để thử, và kết quả rất bất ngờ — hệ thống còn chỉ ra độ chín và gợi ý thời gian sử dụng tốt nhất! Giao diện cũng rất thân thiện."
               </p>
             </div>
           </div>
