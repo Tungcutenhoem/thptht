@@ -16,19 +16,28 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (userData) => {
-    try {
-      const response = await api.post('/auth/login', userData);
-      const { access_token } = response.data;
-      const userWithToken = { ...userData, token: access_token };
-      setUser(userWithToken);
-      localStorage.setItem('user', JSON.stringify(userWithToken));
-      localStorage.setItem('token', access_token);
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    }
-  };
+  const login = async ({ username, password }) => {
+  try {
+    const formData = new URLSearchParams();
+    formData.append('username', username);
+    formData.append('password', password);
+
+    const response = await api.post('/auth/login/user', formData.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    const { access_token } = response.data;
+    const userWithToken = { username, token: access_token };
+    setUser(userWithToken);
+    localStorage.setItem('user', JSON.stringify(userWithToken));
+    localStorage.setItem('token', access_token);
+  } catch (error) {
+    console.error('Login failed:', error);
+    throw error;
+  }
+};
 
   const logout = () => {
     setUser(null);
