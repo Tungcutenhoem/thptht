@@ -1,5 +1,7 @@
 # ai-sys
 hệ thống phân loại chất lượng thực phẩm
+link dockerhub: https://hub.docker.com/repositories/quangllm
+
 Dự án này bao gồm 3 dịch vụ:
 
 🧠 backend: API FastAPI xử lý logic
