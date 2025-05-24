@@ -10,20 +10,20 @@ const AboutUs = () => {
             <div className="flex flex-col md:flex-row items-center justify-center w-full">
                 {/* Left: Nội dung chào hỏi */}
                 <div className="bg-[#0b1f3a] text-white px-10 py-16 md:w-1/2 w-full text-center md:text-left relative">
-                    <h4 className="uppercase text-sm tracking-widest mb-2">
+                    <h4 className="uppercase text-m tracking-widest mb-2">
                         Developer
                     </h4>
                     <hr className="border-white opacity-30 my-2" />
                     <h1 className="text-5xl font-bold mb-4">Nguyễn Hoàng Tú</h1>
                     <hr className="border-white opacity-30 my-4" />
-                    <p className="text-sm">Cảm ơn đã chào đón tôi.</p>
+                    <p className="text-m">23020428</p>
                 </div>
 
                 {/* Right: Ảnh chân dung */}
                 <div className="md:w-1/2 w-full flex items-center justify-center p-8 bg-white">
                     <img
-                        src="/mai-tran.jpg" // Nếu ảnh đặt trong public folder
-                        alt="Mai Trần"
+                        src="/src/public/hoangtu.png" // Nếu ảnh đặt trong public folder
+                        alt="Hoàng Tú"
                         className="w-80 h-80 object-cover rounded-full border-4 border-[#0b1f3a] shadow-md"
                     />
                 </div>
@@ -32,20 +32,20 @@ const AboutUs = () => {
             <div className="flex flex-col md:flex-row items-center justify-center w-full">
                 {/* Left: Nội dung chào hỏi */}
                 <div className="bg-[#3dd9e6] text-white px-10 py-16 md:w-1/2 w-full text-center md:text-left relative">
-                    <h4 className="uppercase text-sm tracking-widest mb-2">
+                    <h4 className="uppercase text-m tracking-widest mb-2">
                         Tester
                     </h4>
                     <hr className="border-white opacity-30 my-2" />
                     <h1 className="text-5xl font-bold mb-4">Nguyễn Bá Quang</h1>
                     <hr className="border-white opacity-30 my-4" />
-                    <p className="text-sm">Cảm ơn đã chào đón tôi.</p>
+                    <p className="text-m">23020412</p>
                 </div>
 
                 {/* Right: Ảnh chân dung */}
                 <div className="md:w-1/2 w-full flex items-center justify-center p-8 bg-white">
                     <img
-                        src="/mai-tran.jpg" // Nếu ảnh đặt trong public folder
-                        alt="Mai Trần"
+                        src="/src/public/baquang.png" // Nếu ảnh đặt trong public folder
+                        alt="Bá Quang"
                         className="w-80 h-80 object-cover rounded-full border-4 border-[#3dd9e6] shadow-md"
                     />
                 </div>
@@ -54,20 +54,20 @@ const AboutUs = () => {
             <div className="flex flex-col md:flex-row items-center justify-center w-full">
                 {/* Left: Nội dung chào hỏi */}
                 <div className="bg-[#0b1f3a] text-white px-10 py-16 md:w-1/2 w-full text-center md:text-left relative">
-                    <h4 className="uppercase text-sm tracking-widest mb-2">
+                    <h4 className="uppercase text-m tracking-widest mb-2">
                         Developer
                     </h4>
                     <hr className="border-white opacity-30 my-2" />
                     <h1 className="text-5xl font-bold mb-4">Vũ Minh Sơn</h1>
                     <hr className="border-white opacity-30 my-4" />
-                    <p className="text-sm">Cảm ơn đã chào đón tôi.</p>
+                    <p className="text-m">23020424</p>
                 </div>
 
                 {/* Right: Ảnh chân dung */}
                 <div className="md:w-1/2 w-full flex items-center justify-center p-8 bg-white">
                     <img
-                        src="/mai-tran.jpg" // Nếu ảnh đặt trong public folder
-                        alt="Mai Trần"
+                        src="/src/public/minhson.png" // Nếu ảnh đặt trong public folder
+                        alt="Minh Sơn"
                         className="w-80 h-80 object-cover rounded-full border-4 border-[#0b1f3a] shadow-md"
                     />
                 </div>
@@ -76,20 +76,20 @@ const AboutUs = () => {
             <div className="flex flex-col md:flex-row items-center justify-center w-full">
                 {/* Left: Nội dung chào hỏi */}
                 <div className="bg-[#3dd9e6] text-white px-10 py-16 md:w-1/2 w-full text-center md:text-left relative">
-                    <h4 className="uppercase text-sm tracking-widest mb-2">
+                    <h4 className="uppercase text-m tracking-widest mb-2">
                         Developer
                     </h4>
                     <hr className="border-white opacity-30 my-2" />
                     <h1 className="text-5xl font-bold mb-4">Mai Minh Tùng</h1>
                     <hr className="border-white opacity-30 my-4" />
-                    <p className="text-sm">Cảm ơn đã chào đón tôi.</p>
+                    <p className="text-m">23020432</p>
                 </div>
 
                 {/* Right: Ảnh chân dung */}
                 <div className="md:w-1/2 w-full flex items-center justify-center p-8 bg-white">
                     <img
-                        src="/mai-tran.jpg" // Nếu ảnh đặt trong public folder
-                        alt="Mai Trần"
+                        src="/src/public/minhtung.png" // Nếu ảnh đặt trong public folder
+                        alt="Mai Tùng"
                         className="w-80 h-80 object-cover rounded-full border-4 border-[#3dd9e6] shadow-md"
                     />
                 </div>
@@ -98,20 +98,20 @@ const AboutUs = () => {
             <div className="flex flex-col md:flex-row items-center justify-center w-full">
                 {/* Left: Nội dung chào hỏi */}
                 <div className="bg-[#0b1f3a] text-white px-10 py-16 md:w-1/2 w-full text-center md:text-left relative">
-                    <h4 className="uppercase text-sm tracking-widest mb-2">
+                    <h4 className="uppercase text-m tracking-widest mb-2">
                         UI designer
                     </h4>
                     <hr className="border-white opacity-30 my-2" />
                     <h1 className="text-5xl font-bold mb-4">Phạm Thế Trung</h1>
                     <hr className="border-white opacity-30 my-4" />
-                    <p className="text-sm">Cảm ơn đã chào đón tôi.</p>
+                    <p className="text-m">23020442</p>
                 </div>
 
                 {/* Right: Ảnh chân dung */}
                 <div className="md:w-1/2 w-full flex items-center justify-center p-8 bg-white">
                     <img
-                        src="/mai-tran.jpg" // Nếu ảnh đặt trong public folder
-                        alt="Mai Trần"
+                        src="/src/public/thetrung.jpg" // Nếu ảnh đặt trong public folder
+                        alt="Thế Trung"
                         className="w-80 h-80 object-cover rounded-full border-4 border-[#0b1f3a] shadow-md"
                     />
                 </div>
@@ -128,17 +128,6 @@ const AboutUs = () => {
                     </div>
 
                     <div className="w-full md:w-auto">
-                        <h3 className="text-black font-semibold mb-2">Đăng ký nhận thông báo</h3>
-                        <div className="flex">
-                            <input
-                                type="email"
-                                placeholder="Nhập địa chỉ email"
-                                className="px-4 py-2 rounded-l bg-gray-300 text-black w-64"
-                            />
-                            <button className="bg-white px-4 py-2 rounded-r hover:bg-cyan-500">
-                                ✈
-                            </button>
-                        </div>
                         <div className="flex space-x-4 mt-3">
                             <a href="#" className="text-[#3dd9e6] hover:text-cyan-400">🌐</a>
                             <a href="#" className="text-[#3dd9e6] hover:text-cyan-400">💻</a>
@@ -152,9 +141,9 @@ const AboutUs = () => {
                 <div className="w-full px-4 sm:px-6 lg:px-8 mt-6 pt-6 border-t border-gray-700 text-center text-gray-400 text-sm">
                     <div className="flex justify-center items-center gap-2">
                         <img src="/src/public/logoDas.png" alt="Logo" className="h-6" />
-                        <span className="font-bold text-black">FOOD FRESH AI</span>
+                        <span className="font-bold text-black">TOMATO FRESH AI</span>
                     </div>
-                    <p className="mt-2">Copyright © 2025 Food Freshness Detection Project. All Rights Reserved</p>
+                    <p className="mt-2">Copyright © 2025 Tomato Quality Inspection Project. All Rights Reserved</p>
                 </div>
             </footer>
         </div>

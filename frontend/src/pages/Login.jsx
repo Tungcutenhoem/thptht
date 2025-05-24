@@ -7,7 +7,8 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const { login } = useAuth();
+  const { login, register } = useAuth();
+
 
   const validateForm = () => {
     if (!username.trim()) {
@@ -21,6 +22,12 @@ function Login() {
     return true;
   };
 
+  const handleTabClick = (path) => {
+    window.location.href = path;
+    //window.location.reload(); // reload trang để App.jsx xử lý lại đường dẫn
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -33,7 +40,7 @@ function Login() {
       setLoading(true);
       await login({ username, password, rememberMe });
     } catch (err) {
-      setError('Failed to login. Please try again.');
+      setError('Đăng nhập thất bại, hãy thử lại');
     } finally {
       setLoading(false);
     }
@@ -44,7 +51,7 @@ function Login() {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-[#0b1f3a]">
-            Sign in to your account
+            Đăng nhập
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -71,6 +78,7 @@ function Login() {
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
+                autoComplete="off"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
@@ -90,7 +98,7 @@ function Login() {
                 disabled={loading}
               />
               <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Remember me
+                Lưu tài khoản
               </label>
             </div>
           </div>
@@ -98,15 +106,23 @@ function Login() {
           <div>
             <button
               type="submit"
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
-                loading ? 'bg-[#0b1f3a]' : 'bg-[#0b1f3a] hover:bg-[#3dd9e6]'
-              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1e3a8a]`}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${loading ? 'bg-[#0b1f3a]' : 'bg-[#0b1f3a] hover:bg-[#3dd9e6]'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1e3a8a]`}
               disabled={loading}
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
           </div>
         </form>
+        {/* Thêm nút đăng ký tài khoản */}
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => handleTabClick('/register')}
+            className="text-sm text-black hover:text-[#3dd9e6]"
+          >
+            Chưa có tài khoản? Tạo tài khoản
+          </button>
+        </div>
       </div>
     </div>
   );

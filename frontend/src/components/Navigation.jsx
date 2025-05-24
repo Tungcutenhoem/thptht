@@ -36,8 +36,8 @@ function Navigation() {
               className="h-12 w-12 object-contain"
             />
             <h1 className="text-2xl font-bold text-center">
-              <span className="text-[#0b1f3a]">Food Freshness </span>
-              <span className="text-[#3dd9e6]">Detection</span>
+              <span className="text-[#0b1f3a]">Tomato Quality </span>
+              <span className="text-[#3dd9e6]">Inspection</span>
             </h1>
           </div>
 

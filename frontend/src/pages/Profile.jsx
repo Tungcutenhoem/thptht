@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
 
 function Profile() {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     username: user?.username || '',
@@ -22,6 +22,31 @@ function Profile() {
       [name]: value
     }));
   };
+  useEffect(() => {
+    console.log('Current password in formData:', formData.currentPassword);
+  }, [formData.currentPassword]);
+
+  const handleEditClick = () => {
+    setFormData(prev => ({
+      ...prev,
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    }));
+    setIsEditing(true);
+  };
+  useEffect(() => {
+    if (isEditing) {  // Chỉ set formData tự động khi không đang chỉnh sửa
+      setFormData({
+        username: user?.username || '',
+        email: user?.email || '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+    }
+  }, [user, isEditing]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,17 +54,22 @@ function Profile() {
     setSuccess('');
 
     if (formData.newPassword !== formData.confirmPassword) {
-      setError('New passwords do not match');
+      setError('Mật khẩu mới không khớp');
       return;
     }
 
     try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSuccess('Profile updated successfully');
+      await updateProfile({
+        username: formData.username,
+        password: formData.currentPassword,
+        newPassword: formData.newPassword || null,
+        newEmail: formData.email !== user.email ? formData.email : null,
+      });
+
+      setSuccess('Thông tin cá nhân đã được cập nhật!');
       setIsEditing(false);
     } catch (err) {
-      setError('Failed to update profile');
+      setError(err?.response?.data?.detail || 'Cập nhật thất bại');
     }
   };
 
@@ -54,7 +84,7 @@ function Profile() {
               <h2 className="text-2xl font-bold text-gray-900">Cài đặt thông tin cá nhân</h2>
               {!isEditing && (
                 <button
-                  onClick={() => setIsEditing(true)}
+                  onClick={handleEditClick}
                   className="bg-[#3dd9e6] text-white px-4 py-2 rounded hover:bg-[#0b1f3a] flex items-center justify-center"
                 >
                   <img
@@ -112,6 +142,7 @@ function Profile() {
                       type="password"
                       name="currentPassword"
                       value={formData.currentPassword}
+                      autoComplete="off"
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-2 border-gray-00 shadow-sm focus:border-blue-600 focus:ring-blue-600"
                     />
@@ -146,7 +177,11 @@ function Profile() {
                 <div className="flex justify-end space-x-4">
                   <button
                     type="button"
-                    onClick={() => setIsEditing(false)}
+                    onClick={() => {
+                      setIsEditing(false);
+                      setError('');
+                      setSuccess('');
+                    }}
                     className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
                   >
                     Hủy thay đổi

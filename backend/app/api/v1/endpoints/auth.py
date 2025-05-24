@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from app.schemas.auth import Token
@@ -8,6 +8,7 @@ from app import schemas, models
 from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.core.security import hash_password
+
 
 router = APIRouter()
 
@@ -40,6 +41,7 @@ def login_user(
 @router.post("/register", response_model=schemas.auth.UserOut)
 def register(user_data: schemas.auth.UserCreate, db: Session = Depends(get_db)):
     # Check if user already exists
+    print("Received data:", user_data.dict())
     if db.query(models.user.User).filter(models.user.User.email == user_data.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
@@ -53,3 +55,35 @@ def register(user_data: schemas.auth.UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     return new_user
+
+@router.post("/update-profile")
+def update_profile(
+    form_data: OAuth2PasswordRequestForm = Depends(),  # username + old_password
+    new_password: str = Form(None),                    # optional
+    new_email: str = Form(None),                       # optional
+    db: Session = Depends(get_db)
+):
+    # Lấy user từ DB
+    user = db.query(models.user.User).filter(models.user.User.username == form_data.username).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Không tìm thấy người dùng")
+
+    # Kiểm tra mật khẩu cũ
+    if not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Mật khẩu hiện tại không đúng")
+
+    # Cập nhật mật khẩu mới nếu có
+    if new_password:
+        user.hashed_password = hash_password(new_password)
+
+    # Cập nhật email mới nếu có
+    if new_email:
+        if db.query(models.user.User).filter(models.user.User.email == new_email).first():
+            raise HTTPException(status_code=400, detail="Email đã được sử dụng")
+        user.email = new_email
+
+    db.commit()
+    db.refresh(user)
+
+    return user

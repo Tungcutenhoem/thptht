@@ -13,6 +13,7 @@ import PageNotFound from './pages/PageNotFound';
 import AboutUs from './pages/AboutUs';
 import ClassificationOutput from '../src/components/Results/ClassificationOutput';
 import WebcamRealtimeClassification from "../src/components/MediaDisplay/WebcamRealtimeClassification";
+import Register from './pages/Register';
 
 
 
@@ -50,9 +51,9 @@ function MainApp() {
 
     setSelectedFile(file);
     if (file.type.startsWith('image/')) {
-    const previewURL = URL.createObjectURL(file);
-    setDroppedImage(previewURL);  // <-- thêm dòng này
-  }
+      const previewURL = URL.createObjectURL(file);
+      setDroppedImage(previewURL);  // <-- thêm dòng này
+    }
 
     dispatch({ type: 'SET_CURRENT_FILE', payload: file });
 
@@ -92,12 +93,14 @@ function MainApp() {
     };
   }, [cleanupVideo]);
 
+  const path = window.location.pathname;
+  if (path === '/register') {
+    return <Register />;
+  }
+
   if (!user) {
     return <Login />;
   }
-
-  // Get current path
-  const path = window.location.pathname;
 
   if (path === '/admin') {
     return (
@@ -138,9 +141,9 @@ function MainApp() {
       {/* Title */}
       <div className="container mx-auto p-4 text-center">
         <div className="mb-4">
-          <h1 className="text-black text-3xl font-bold">Food Freshness Detection - Kiểm tra độ tươi của sản phẩm </h1>
+          <h1 className="text-black text-3xl font-bold">Tomato Quality Inspection - Kiểm tra chất lượng cà chua </h1>
           <p className="text-black-600 mt-2 text-base max-w-6xl mx-auto">
-            Khám phá độ tươi và chất lượng thực phẩm của bạn với công nghệ AI hiện đại. Tải ảnh hoặc video để nhận kết quả chi tiết về độ tươi, màu sắc, và trạng thái của thực phẩm.
+            Khám phá độ tươi và chất lượng cà chua của bạn với công nghệ AI hiện đại. Tải ảnh hoặc video để nhận kết quả chi tiết về độ tươi và trạng thái của cà chua.
           </p>
         </div>
       </div>
@@ -164,163 +167,195 @@ function MainApp() {
           <div className="flex-1">
             <div className="max-w-xl mx-auto bg-white p-14 rounded-2xl shadow-lg">
               <div className="flex flex-col items-center mb-4">
-                <span className="text-[#14213D] font-medium mb-2">Kéo và thả ảnh vào đây</span>
-                {/* Drop Zone */}
-                <div
-                    className="w-20 h-20 bg-[#3dd9e6] rounded-full flex items-center justify-center mb-4 cursor-pointer hover:scale-105 transition"
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={handleImageDrop}
-                >
-                  <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-8 h-8 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                  >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4 12l8-8m0 0l8 8m-8-8v16"
-                    />
-                  </svg>
-                </div>
 
-                <div style={{position: 'relative', display: 'inline-block'}}>
-                  <img
-                      src={
-                        state.classificationResult?.data?.image_base64
-                            ? `data:image/jpeg;base64,${state.classificationResult.data.image_base64}`
-                            : ''
-                      }
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  {state.classificationResult?.data?.image_base64 && (
+                    <img
+                      src={`data:image/jpeg;base64,${state.classificationResult.data.image_base64}`}
                       alt="Detected"
-                  />
-
+                    />
+                  )}
 
                   {Array.isArray(state.classificationResult?.data?.predictions) &&
-                      state.classificationResult.data.predictions.map((pred, idx) => {
-                        const [x, y, w, h] = pred.bounding_box.map(Number);
-                        return (
-                            <div key={idx} style={{
+                    state.classificationResult.data.predictions.map((pred, idx) => {
+                      const [x, y, w, h] = pred.bounding_box.map(Number);
+                      return (
+                        <div key={idx} style={{
+                          position: 'absolute',
+                          left: x,
+                          top: y,
+                          width: w,
+                          height: h,
+                          pointerEvents: 'none'
+                        }}>
+                          {/* Khung bao quanh */}
+                          <div
+                            style={{
+                              border: '2px solid #ff0000 !important',
+                              borderRadius: '4px',
+                              width: '100%',
+                              height: '100%',
+                              boxSizing: 'border-box',
+                            }}
+                          />
+                          {/* Text label */}
+                          <div
+                            style={{
                               position: 'absolute',
-                              left: x,
-                              top: y,
-                              width: w,
-                              height: h,
-                              pointerEvents: 'none'
-                            }}>
-                              {/* Khung bao quanh */}
-                              <div
-                                  style={{
-                                    border: '2px solid #ff0000 !important',
-                                    borderRadius: '4px',
-                                    width: '100%',
-                                    height: '100%',
-                                    boxSizing: 'border-box',
-                                  }}
-                              />
-                              {/* Text label */}
-                              <div
-                                  style={{
-                                    position: 'absolute',
-                                    top: -40, // lên trên khung 1 chút
-                                    left: 0,
-                                    backgroundColor: '#ff0000',
-                                    color: 'white',
-                                    padding: '4px 8px',
-                                    borderRadius: '4px',
-                                    fontWeight: 'bold',
-                                    fontSize: '24px', // chữ to hơn
-                                    whiteSpace: 'nowrap',
-                                    zIndex: 10,        // chắc chắn label nổi lên trên
-                                    pointerEvents: 'none',
-                                  }}
-                              >
-                                {pred.class} ({(pred.confidence * 100).toFixed(1)}%)
-                              </div>
-                            </div>
-                        );
-                      })}
+                              top: -40, // lên trên khung 1 chút
+                              left: 0,
+                              backgroundColor: '#ff0000',
+                              color: 'white',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              fontWeight: 'bold',
+                              fontSize: '24px', // chữ to hơn
+                              whiteSpace: 'nowrap',
+                              zIndex: 10,        // chắc chắn label nổi lên trên
+                              pointerEvents: 'none',
+                            }}
+                          >
+                            {pred.class} ({(pred.confidence * 100).toFixed(1)}%)
+                          </div>
+                        </div>
+                      );
+                    })}
                 </div>
 
-
+                {/* Webcam */}
+                {state.inputType === 'webcam' && (
+                  <WebcamRealtimeClassification
+                    onError={(error) => {
+                      console.error("Lỗi webcam:", error);
+                      dispatch({ type: 'SET_ERROR', payload: error });
+                    }}
+                    onResult={(result) => {
+                      dispatch({ type: 'SET_RESULT', payload: result });
+                    }}
+                  />
+                )}
                 {/* Buttons - chỉ hiện khi chưa có ảnh */}
-                {!droppedImage && (
-                    <>
-                      {/* Buttons */}
-                      <div className="mb-4 flex flex-wrap justify-center gap-2">
-                        <button
-                            onClick={() => dispatch({type: 'SET_INPUT_TYPE', payload: 'image'})}
-                            className={`px-4 py-2 rounded font-medium transition ${state.inputType === 'image'
-                                ? 'bg-[#14213D] text-white'
-                                : 'bg-gray-200 text-gray-700 hover:bg-[#3dd9e6]'
-                            }`}
-                        >
-                          Ảnh
-                        </button>
+                {!droppedImage && state.inputType !== 'webcam' && (
+                  <>
+                    <span className="text-[#14213D] font-medium mb-2">Kéo và thả ảnh vào đây</span>
+                    {/* Drop Zone */}
+                    <div
+                      className="w-20 h-20 bg-[#3dd9e6] rounded-full flex items-center justify-center mb-4 cursor-pointer hover:scale-105 transition"
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={handleImageDrop}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-8 h-8 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4 12l8-8m0 0l8 8m-8-8v16"
+                        />
+                      </svg>
+                    </div>
+                    {/* Buttons */}
+                    <div className="mb-4 flex flex-wrap justify-center gap-2">
+                      <button
+                        onClick={() => dispatch({ type: 'SET_INPUT_TYPE', payload: 'image' })}
+                        className={`px-4 py-2 rounded font-medium transition ${state.inputType === 'image'
+                          ? 'bg-[#14213D] text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-[#3dd9e6]'
+                          }`}
+                      >
+                        Ảnh
+                      </button>
 
-                        <button
-                            onClick={() => dispatch({type: 'SET_INPUT_TYPE', payload: 'video'})}
-                            className={`px-4 py-2 rounded font-medium transition ${state.inputType === 'video'
-                                ? 'bg-[#14213D] text-white'
-                                : 'bg-gray-200 text-gray-700 hover:bg-[#3dd9e6]'
-                            }`}
-                        >
-                          Video
-                        </button>
+                      <button
+                        onClick={() => dispatch({ type: 'SET_INPUT_TYPE', payload: 'video' })}
+                        className={`px-4 py-2 rounded font-medium transition ${state.inputType === 'video'
+                          ? 'bg-[#14213D] text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-[#3dd9e6]'
+                          }`}
+                      >
+                        Video
+                      </button>
 
-                        <button
-                            onClick={() => dispatch({type: 'SET_INPUT_TYPE', payload: 'webcam'})}
-                            className={`px-4 py-2 rounded font-medium transition ${state.inputType === 'webcam'
-                                ? 'bg-[#14213D] text-white'
-                                : 'bg-gray-200 text-gray-700 hover:bg-[#3dd9e6]'
-                            }`}
-                        >
-                          Webcam
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => dispatch({ type: 'SET_INPUT_TYPE', payload: 'webcam' })}
+                        className={`px-4 py-2 rounded font-medium transition ${state.inputType === 'webcam'
+                          ? 'bg-[#14213D] text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-[#3dd9e6]'
+                          }`}
+                      >
+                        Webcam
+                      </button>
+                    </div>
 
-                      {/* File Input */}
-                      {(state.inputType === 'image' || state.inputType === 'video') && (
-                          <div className="mb-4 w-full flex flex-col items-center space-y-2">
-                            {/* File input */}
-                            <input
-                                type="file"
-                                accept={state.inputType === 'image' ? 'image/*' : 'video/*'}
-                                onChange={handleFileSelect}
-                                className="text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
+                    {/* File Input */}
+                    {(state.inputType === 'image' || state.inputType === 'video') && (
+                      <div className="mb-4 w-full flex flex-col items-center space-y-2">
+                        {/* File input */}
+                        <input
+                          type="file"
+                          accept={state.inputType === 'image' ? 'image/*' : 'video/*'}
+                          onChange={handleFileSelect}
+                          className="text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
                           file:rounded file:border-0 file:text-sm file:font-semibold
                           file:bg-[#3dd9e6] file:text-white hover:file:bg-[#3dd9e6]"
-                            />
+                        />
+                      </div>
+                    )}
 
-                            {/* Nút hủy nhỏ, chỉ hiện khi có file */}
-                            {selectedFile && (
-                                <button
-                                    onClick={() => setSelectedFile(null)}
-                                    className="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                                >
-                                  Hủy file
-                                </button>
-                            )}
-                          </div>
-                      )}
 
-                      {/* Webcam */}
-                      {state.inputType === 'webcam' && (
-                          <WebcamRealtimeClassification
-                              onError={(error) => {
-                                console.error("Lỗi webcam:", error);
-                                dispatch({type: 'SET_ERROR', payload: error});
-                              }}
-                              onResult={(result) => {
-                                dispatch({type: 'SET_RESULT', payload: result});
-                              }}
-                          />
-                      )}
-                    </>
+                  </>
+                )}
+                {/* Nút hủy file - hiện khi có ảnh đã thả */}
+                {(droppedImage) && (
+                  <button
+                    onClick={() => {
+                      setDroppedImage(null);
+                      setSelectedFile(null);
+                      dispatch({ type: 'CLEAR_RESULT' });
+                    }}
+                    className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition"
+                  >
+                    Hủy tệp
+                  </button>
+                )}
+                {/* Nút Dừng camera khi đang dùng webcam */}
+                {state.inputType === 'webcam' && (
+                  <button
+                    onClick={() => {
+                      dispatch({ type: 'CLEAR_RESULT' });
+
+                      // Dừng webcam
+                      const video = document.getElementById('webcam-video');
+                      if (video && video.srcObject) {
+                        video.srcObject.getTracks().forEach(track => track.stop());
+                        video.srcObject = null;
+                      }
+
+                      // Chuyển giao diện về kéo thả ảnh (image)
+                      dispatch({ type: 'SET_INPUT_TYPE', payload: 'image' });
+                    }}
+                    className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition"
+                  >
+                    Dừng camera
+                  </button>
+
                 )}
               </div>
+            </div>
+            {/* Phần kết quả*/}
+            <div className="bg-white-100 justify-center">
+              {/* Results Display */}
+              {state.classificationResult && (
+                <div className="mt-4 p-4 pl-50 bg-white rounded w-full max-w-xl text-left">
+                  <h2 className="text-xl font-bold mb-2">Kết quả phân loại</h2>
+                  <ClassificationOutput result={state.classificationResult} />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -328,44 +363,37 @@ function MainApp() {
 
       {/* Video Controls */}
       {state.inputType === 'video' && selectedFile && (
-          <div className="mb-4 text-center">
-            {!isVideoPlaying ? (
-                <button
-                    onClick={handleVideoStart}
-                    className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600"
-                >
-                  Start Processing
-                </button>
-            ) : (
-                <button
-                    onClick={handleVideoStop}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                >
-                  Stop Processing
-                </button>
-            )}
-            {duration > 0 && (
-                <div className="mt-2">
-                  Progress: {Math.round(currentTime)}s / {Math.round(duration)}s
-                </div>
-            )}
-          </div>
+        <div className="mb-4 text-center">
+          {!isVideoPlaying ? (
+            <button
+              onClick={handleVideoStart}
+              className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600"
+            >
+              Start Processing
+            </button>
+          ) : (
+            <button
+              onClick={handleVideoStop}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            >
+              Stop Processing
+            </button>
+          )}
+          {duration > 0 && (
+            <div className="mt-2">
+              Progress: {Math.round(currentTime)}s / {Math.round(duration)}s
+            </div>
+          )}
+        </div>
       )}
 
       {/* Error */}
       {state.error && (
-          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-center">
-            {state.error}
-          </div>
+        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-center">
+          {state.error}
+        </div>
       )}
 
-      {/* Results Display */}
-      {state.classificationResult && (
-          <div className="mt-4 p-4 bg-gray-100 rounded">
-            <h2 className="text-xl font-bold mb-2">classification Result</h2>
-            <ClassificationOutput result={state.classificationResult} />
-          </div>
-        )}
 
       {/* Loading */}
       {state.isProcessing && (
@@ -380,23 +408,23 @@ function MainApp() {
           {/* Bên trái: nội dung hướng dẫn */}
           <div className="flex-1">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Cách kiểm tra độ tươi của thực phẩm?
+              Cách kiểm tra độ tươi của cà chua?
             </h2>
 
             <div className="space-y-5 text-black text-base leading-relaxed">
               <div>
                 <h4 className="font-semibold text-[#3dd9e6]">Tải ảnh hoặc video</h4>
-                <p>Chọn ảnh hoặc quay video thực phẩm bằng thiết bị của bạn, hoặc sử dụng webcam trực tiếp.</p>
+                <p>Chọn ảnh hoặc quay video cà chua bằng thiết bị của bạn, hoặc sử dụng webcam trực tiếp.</p>
               </div>
 
               <div>
                 <h4 className="font-semibold text-[#3dd9e6]">Phân tích bằng AI</h4>
-                <p>Hệ thống sẽ tự động nhận diện và phân tích các đặc điểm như màu sắc, kết cấu, và dấu hiệu hư hỏng để xác định độ tươi của thực phẩm.</p>
+                <p>Hệ thống sẽ tự động nhận diện và phân tích các đặc điểm như màu sắc, kết cấu, và dấu hiệu hư hỏng để xác định độ tươi của cà chua.</p>
               </div>
 
               <div>
                 <h4 className="font-semibold text-[#3dd9e6]">Xem kết quả</h4>
-                <p>Kết quả được hiển thị trực quan kèm theo đánh giá chi tiết về tình trạng và mức độ tươi của thực phẩm.</p>
+                <p>Kết quả được hiển thị trực quan kèm theo đánh giá chi tiết về tình trạng và mức độ tươi của cà chua.</p>
               </div>
             </div>
           </div>
@@ -425,7 +453,7 @@ function MainApp() {
               <div className="text-pink-500 text-sm mb-2">★★★★★</div>
               <div className="text-blue-400 text-3xl text-right mt-2">❝</div>
               <p className="text-gray-700 text-sm">
-                "Tôi thường rất lo lắng khi mua thực phẩm ngoài chợ. Nhờ hệ thống này, tôi có thể kiểm tra nhanh độ tươi của rau củ chỉ bằng ảnh chụp. Thật sự rất tiện lợi và chính xác!"
+                "Tôi thường rất lo lắng khi mua cà chua ngoài chợ. Nhờ hệ thống này, tôi có thể kiểm tra nhanh độ tươi của cà chua chỉ bằng ảnh chụp. Thật sự rất tiện lợi và chính xác!"
               </p>
             </div>
 
@@ -435,7 +463,7 @@ function MainApp() {
               <div className="text-pink-500 text-sm mb-2">★★★★★</div>
               <div className="text-blue-400 text-3xl text-right mt-2">❝</div>
               <p className="text-gray-700 text-sm">
-                "Là chủ một chuỗi cửa hàng thực phẩm sạch, tôi rất cần một công cụ hỗ trợ kiểm định. Công nghệ AI trong hệ thống này đã giúp tôi tiết kiệm thời gian và nâng cao chất lượng kiểm tra."
+                "Là chủ một chuỗi cửa hàng cà chua sạch, tôi rất cần một công cụ hỗ trợ kiểm định. Công nghệ AI trong hệ thống này đã giúp tôi tiết kiệm thời gian và nâng cao chất lượng kiểm tra."
               </p>
             </div>
 
@@ -503,24 +531,13 @@ function MainApp() {
         {/* Thông tin nhóm & đăng ký */}
         <div className="max-w-7xl mx-auto mt-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-t border-gray-700 pt-6">
           <div className="text-gray-300 text-sm">
-            <p className="font-semibold text-white">Nhóm phát triển - Food Freshness Detection</p>
+            <p className="font-semibold text-white">Nhóm phát triển - Tomato Quality Inspection</p>
             <p>📍 Trường Đại học Công Nghệ, Đại học Quốc gia Hà Nội, Quận Cầu Giấy, Thành phố Hà Nội</p>
             <p>✉ foodfresh.ai@gmail.com</p>
             <p>📞 0123 456 789</p>
           </div>
 
           <div className="w-full md:w-auto">
-            <h3 className="text-white font-semibold mb-2">Đăng ký nhận thông báo</h3>
-            <div className="flex">
-              <input
-                type="email"
-                placeholder="Nhập địa chỉ email"
-                className="px-4 py-2 rounded-l bg-white text-black w-64"
-              />
-              <button className="bg-[#3dd9e6] px-4 py-2 rounded-r hover:bg-cyan-500">
-                ✈
-              </button>
-            </div>
             <div className="flex space-x-4 mt-3">
               <a href="#" className="text-[#3dd9e6] hover:text-cyan-400">🌐</a>
               <a href="#" className="text-[#3dd9e6] hover:text-cyan-400">💻</a>
@@ -534,9 +551,9 @@ function MainApp() {
         <div className="max-w-7xl mx-auto mt-6 pt-6 border-t border-gray-700 text-center text-gray-400 text-sm">
           <div className="flex justify-center items-center gap-2">
             <img src="/src/public/logoDas.png" alt="Logo" className="h-6" />
-            <span className="font-bold text-white">FOOD FRESH AI</span>
+            <span className="font-bold text-white">TOMATO FRESH AI</span>
           </div>
-          <p className="mt-2">Copyright © 2025 Food Freshness Detection Project. All Rights Reserved</p>
+          <p className="mt-2">Copyright © 2025 Tomato Quality Inspection Project. All Rights Reserved</p>
         </div>
       </footer>
 

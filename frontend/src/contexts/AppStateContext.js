@@ -35,26 +35,34 @@ const appStateReducer = (state, action) => {
       return { ...state, currentFrame: action.payload };
 
     case 'SET_CLASSIFICATION_RESULT':
-      return { 
-        ...state, 
+      return {
+        ...state,
         classificationResult: action.payload,
         isProcessing: false,
-        error: null 
+        error: null
       };
 
     case 'SET_PROCESSING':
-      return { 
-        ...state, 
+      return {
+        ...state,
         isProcessing: action.payload,
-        error: action.payload ? null : state.error 
+        error: action.payload ? null : state.error
       };
 
     case 'SET_ERROR':
-      return { 
-        ...state, 
+      return {
+        ...state,
         error: action.payload,
-        isProcessing: false 
+        isProcessing: false
       };
+    case 'CLEAR_RESULT':
+      return {
+        ...state,
+        classificationResult: null,
+        isProcessing: false,
+        error: null,
+      };
+
 
     case 'RESET_STATE':
       return initialState;
