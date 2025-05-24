@@ -30,38 +30,38 @@ api.interceptors.response.use(
   }
 );
 
-export const classifyImage = async (imageFile) => {
-  const formData = new FormData();
-  formData.append('file', imageFile);
-  
-  const response = await api.post('/classify/analyze_image', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  
-  return response.data.data;
-};
+// export const classifyImage = async (imageFile) => {
+//   const formData = new FormData();
+//   formData.append('file', imageFile);
+//
+//   const response = await api.post('/classify/analyze_image', formData, {
+//     headers: {
+//       'Content-Type': 'multipart/form-data',
+//     },
+//   });
+//
+//   return response.data.data;
+// };
+//
+// export const classifyFrame = async (frameData) => {
+//   const response = await api.post('/classify/frame', {
+//     frame: frameData
+//   });
+//
+//   return response.data.data;
+// };
+//
+// export const classifyVideo = async (videoFile) => {
+//   const formData = new FormData();
+//   formData.append('file', videoFile);
+//
+//   const response = await api.post('/classify/video', formData, {
+//     headers: {
+//       'Content-Type': 'multipart/form-data',
+//     },
+//   });
+//
+//   return response.data.data;
+// };
 
-export const classifyFrame = async (frameData) => {
-  const response = await api.post('/classify/frame', {
-    frame: frameData
-  });
-  
-  return response.data.data;
-};
-
-export const classifyVideo = async (videoFile) => {
-  const formData = new FormData();
-  formData.append('file', videoFile);
-  
-  const response = await api.post('/classify/video', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  
-  return response.data.data;
-};
-
-export default api; 
+export default api;
