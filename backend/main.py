@@ -6,6 +6,10 @@ from app.core.logger import get_logger  # Import get_logger thay vì setup_loggi
 
 # Tạo ứng dụng FastAPI
 app = FastAPI()
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 
 # Cấu hình logger
 logger = get_logger(__name__)
@@ -21,7 +25,7 @@ app.include_router(admin.router, prefix="/admin", tags=["admin"])
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

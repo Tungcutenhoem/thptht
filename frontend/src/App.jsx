@@ -4,7 +4,6 @@ import { useAuth } from './contexts/AuthContext';
 import { AuthProvider } from './contexts/AuthContext';
 import useVideoFileProcessor from './hooks/useVideoFileProcessor';
 import classificationService from './services/classificationService';
-import WebcamComponent from './components/WebcamComponent';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
@@ -12,6 +11,9 @@ import Navigation from './components/Navigation';
 import ProtectedRoute from './components/ProtectedRoute';
 import PageNotFound from './pages/PageNotFound';
 import AboutUs from './pages/AboutUs';
+import ClassificationOutput from '../src/components/Results/ClassificationOutput';
+import WebcamRealtimeClassification from "../src/components/MediaDisplay/WebcamRealtimeClassification";
+
 
 
 function MainApp() {
@@ -26,6 +28,7 @@ function MainApp() {
     if (file && file.type.startsWith('image/')) {
       const previewURL = URL.createObjectURL(file);
       setDroppedImage(previewURL);
+      processFile(file)
     } else {
       alert('Vui lòng thả một tệp ảnh!');
     }
@@ -42,10 +45,14 @@ function MainApp() {
   } = useVideoFileProcessor(5);
 
   // Handle file selection
-  const processFile = async (event) => {
+  const processFile = async (file) => {
     if (!file) return;
 
     setSelectedFile(file);
+    if (file.type.startsWith('image/')) {
+    const previewURL = URL.createObjectURL(file);
+    setDroppedImage(previewURL);  // <-- thêm dòng này
+  }
 
     dispatch({ type: 'SET_CURRENT_FILE', payload: file });
 
@@ -124,7 +131,7 @@ function MainApp() {
   }
 
   return (
-    //phần 1 
+    //phần 1
     <div className="min-h-screen bg-white ">
       <Navigation />
 
@@ -160,116 +167,159 @@ function MainApp() {
                 <span className="text-[#14213D] font-medium mb-2">Kéo và thả ảnh vào đây</span>
                 {/* Drop Zone */}
                 <div
-                  className="w-20 h-20 bg-[#3dd9e6] rounded-full flex items-center justify-center mb-4 cursor-pointer hover:scale-105 transition"
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={handleImageDrop}
+                    className="w-20 h-20 bg-[#3dd9e6] rounded-full flex items-center justify-center mb-4 cursor-pointer hover:scale-105 transition"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={handleImageDrop}
                 >
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-8 h-8 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-8 h-8 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2"
                   >
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M4 12l8-8m0 0l8 8m-8-8v16"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4 12l8-8m0 0l8 8m-8-8v16"
                     />
                   </svg>
                 </div>
 
-                {droppedImage && (
-                  <div className="flex flex-col items-center mt-4 space-y-2">
-                    <img
-                      src={droppedImage}
-                      alt="Ảnh đã chọn"
-                      className="w-70 h-70  object-cover rounded-lg shadow-md"
-                    />
-                    <button
-                      onClick={() => setDroppedImage(null)}
-                      className="mt-2 px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition"
-                    >
-                      Hủy ảnh
-                    </button>
-                  </div>
-                )}
+                <div style={{position: 'relative', display: 'inline-block'}}>
+                  <img
+                      src={
+                        state.classificationResult?.data?.image_base64
+                            ? `data:image/jpeg;base64,${state.classificationResult.data.image_base64}`
+                            : ''
+                      }
+                      alt="Detected"
+                  />
+
+
+                  {Array.isArray(state.classificationResult?.data?.predictions) &&
+                      state.classificationResult.data.predictions.map((pred, idx) => {
+                        const [x, y, w, h] = pred.bounding_box.map(Number);
+                        return (
+                            <div key={idx} style={{
+                              position: 'absolute',
+                              left: x,
+                              top: y,
+                              width: w,
+                              height: h,
+                              pointerEvents: 'none'
+                            }}>
+                              {/* Khung bao quanh */}
+                              <div
+                                  style={{
+                                    border: '2px solid #ff0000 !important',
+                                    borderRadius: '4px',
+                                    width: '100%',
+                                    height: '100%',
+                                    boxSizing: 'border-box',
+                                  }}
+                              />
+                              {/* Text label */}
+                              <div
+                                  style={{
+                                    position: 'absolute',
+                                    top: -40, // lên trên khung 1 chút
+                                    left: 0,
+                                    backgroundColor: '#ff0000',
+                                    color: 'white',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px',
+                                    fontWeight: 'bold',
+                                    fontSize: '24px', // chữ to hơn
+                                    whiteSpace: 'nowrap',
+                                    zIndex: 10,        // chắc chắn label nổi lên trên
+                                    pointerEvents: 'none',
+                                  }}
+                              >
+                                {pred.class} ({(pred.confidence * 100).toFixed(1)}%)
+                              </div>
+                            </div>
+                        );
+                      })}
+                </div>
+
 
                 {/* Buttons - chỉ hiện khi chưa có ảnh */}
                 {!droppedImage && (
-                  <>
-                    {/* Buttons */}
-                    <div className="mb-4 flex flex-wrap justify-center gap-2">
-                      <button
-                        onClick={() => dispatch({ type: 'SET_INPUT_TYPE', payload: 'image' })}
-                        className={`px-4 py-2 rounded font-medium transition ${state.inputType === 'image'
-                          ? 'bg-[#14213D] text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-[#3dd9e6]'
-                          }`}
-                      >
-                        Ảnh
-                      </button>
+                    <>
+                      {/* Buttons */}
+                      <div className="mb-4 flex flex-wrap justify-center gap-2">
+                        <button
+                            onClick={() => dispatch({type: 'SET_INPUT_TYPE', payload: 'image'})}
+                            className={`px-4 py-2 rounded font-medium transition ${state.inputType === 'image'
+                                ? 'bg-[#14213D] text-white'
+                                : 'bg-gray-200 text-gray-700 hover:bg-[#3dd9e6]'
+                            }`}
+                        >
+                          Ảnh
+                        </button>
 
-                      <button
-                        onClick={() => dispatch({ type: 'SET_INPUT_TYPE', payload: 'video' })}
-                        className={`px-4 py-2 rounded font-medium transition ${state.inputType === 'video'
-                          ? 'bg-[#14213D] text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-[#3dd9e6]'
-                          }`}
-                      >
-                        Video
-                      </button>
+                        <button
+                            onClick={() => dispatch({type: 'SET_INPUT_TYPE', payload: 'video'})}
+                            className={`px-4 py-2 rounded font-medium transition ${state.inputType === 'video'
+                                ? 'bg-[#14213D] text-white'
+                                : 'bg-gray-200 text-gray-700 hover:bg-[#3dd9e6]'
+                            }`}
+                        >
+                          Video
+                        </button>
 
-                      <button
-                        onClick={() => dispatch({ type: 'SET_INPUT_TYPE', payload: 'webcam' })}
-                        className={`px-4 py-2 rounded font-medium transition ${state.inputType === 'webcam'
-                          ? 'bg-[#14213D] text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-[#3dd9e6]'
-                          }`}
-                      >
-                        Webcam
-                      </button>
-                    </div>
+                        <button
+                            onClick={() => dispatch({type: 'SET_INPUT_TYPE', payload: 'webcam'})}
+                            className={`px-4 py-2 rounded font-medium transition ${state.inputType === 'webcam'
+                                ? 'bg-[#14213D] text-white'
+                                : 'bg-gray-200 text-gray-700 hover:bg-[#3dd9e6]'
+                            }`}
+                        >
+                          Webcam
+                        </button>
+                      </div>
 
-                    {/* File Input */}
-                    {(state.inputType === 'image' || state.inputType === 'video') && (
-                      <div className="mb-4 w-full flex flex-col items-center space-y-2">
-                        {/* File input */}
-                        <input
-                          type="file"
-                          accept={state.inputType === 'image' ? 'image/*' : 'video/*'}
-                          onChange={handleFileSelect}
-                          className="text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
+                      {/* File Input */}
+                      {(state.inputType === 'image' || state.inputType === 'video') && (
+                          <div className="mb-4 w-full flex flex-col items-center space-y-2">
+                            {/* File input */}
+                            <input
+                                type="file"
+                                accept={state.inputType === 'image' ? 'image/*' : 'video/*'}
+                                onChange={handleFileSelect}
+                                className="text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
                           file:rounded file:border-0 file:text-sm file:font-semibold
                           file:bg-[#3dd9e6] file:text-white hover:file:bg-[#3dd9e6]"
-                        />
+                            />
 
-                        {/* Nút hủy nhỏ, chỉ hiện khi có file */}
-                        {selectedFile && (
-                          <button
-                            onClick={() => setSelectedFile(null)}
-                            className="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                          >
-                            Hủy file
-                          </button>
-                        )}
-                      </div>
-                    )}
+                            {/* Nút hủy nhỏ, chỉ hiện khi có file */}
+                            {selectedFile && (
+                                <button
+                                    onClick={() => setSelectedFile(null)}
+                                    className="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                                >
+                                  Hủy file
+                                </button>
+                            )}
+                          </div>
+                      )}
 
-                    {/* Webcam */}
-                    {state.inputType === 'webcam' && (
-                      <WebcamComponent 
-                        onError={(error) => {
-                          console.error("Lỗi webcam:", error);
-                          dispatch({ type: 'SET_ERROR', payload: error });
-                        }}
-                      />
-                    )}
-
-                  </>
+                      {/* Webcam */}
+                      {state.inputType === 'webcam' && (
+                          <WebcamRealtimeClassification
+                              onError={(error) => {
+                                console.error("Lỗi webcam:", error);
+                                dispatch({type: 'SET_ERROR', payload: error});
+                              }}
+                              onResult={(result) => {
+                                dispatch({type: 'SET_RESULT', payload: result});
+                              }}
+                          />
+                      )}
+                    </>
                 )}
-
               </div>
             </div>
           </div>
@@ -278,43 +328,42 @@ function MainApp() {
 
       {/* Video Controls */}
       {state.inputType === 'video' && selectedFile && (
-        <div className="mb-4 text-center">
-          {!isVideoPlaying ? (
-            <button
-              onClick={handleVideoStart}
-              className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600"
-            >
-              Start Processing
-            </button>
-          ) : (
-            <button
-              onClick={handleVideoStop}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-            >
-              Stop Processing
-            </button>
-          )}
-          {duration > 0 && (
-            <div className="mt-2">
-              Progress: {Math.round(currentTime)}s / {Math.round(duration)}s
-            </div>
-          )}
-        </div>
+          <div className="mb-4 text-center">
+            {!isVideoPlaying ? (
+                <button
+                    onClick={handleVideoStart}
+                    className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600"
+                >
+                  Start Processing
+                </button>
+            ) : (
+                <button
+                    onClick={handleVideoStop}
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                >
+                  Stop Processing
+                </button>
+            )}
+            {duration > 0 && (
+                <div className="mt-2">
+                  Progress: {Math.round(currentTime)}s / {Math.round(duration)}s
+                </div>
+            )}
+          </div>
       )}
 
       {/* Error */}
       {state.error && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-center">
-          {state.error}
-        </div>
+          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-center">
+            {state.error}
+          </div>
       )}
 
-        {/* Results Display */}
-        {state.classificationResult && (
+      {/* Results Display */}
+      {state.classificationResult && (
           <div className="mt-4 p-4 bg-gray-100 rounded">
-            <h2 className="text-xl font-bold mb-2">Classification Result</h2>
-            <p>Status: {state.classificationResult.classification}</p>
-            <p>Confidence: {(state.classificationResult.confidence * 100).toFixed(2)}%</p>
+            <h2 className="text-xl font-bold mb-2">classification Result</h2>
+            <ClassificationOutput result={state.classificationResult} />
           </div>
         )}
 

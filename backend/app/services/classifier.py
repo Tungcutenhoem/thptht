@@ -24,32 +24,35 @@ class Classifier:
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model.to(self.device)
 
-    def predict_image(self, image: Union[bytes, str, Image.Image]) -> Dict[str, Union[str, float]]:
+    def predict_image(self, image: Union[bytes, str, Image.Image]) -> Dict[str, Union[str, float, List[int]]]:
         """
         Predict classification for a single image.
         """
         try:
-            # print("Preprocessing image...")
             processed_image = preprocess_image(image)
-            # print(f"Image preprocessed successfully. Size: {processed_image.size}")
-
-            # print("Running model prediction...")
             results = self.model(processed_image)
-            result = results[0]  # Lấy kết quả đầu tiên
-            # print(f"Raw model results: {result}")
+            result = results[0]
 
             if not result.boxes or len(result.boxes.cls) == 0:
                 print("Không phát hiện đối tượng.")
-                return {"classification": "Không xác định", "confidence": 0.0}
+                return {
+                    "classification": "Không xác định",
+                    "confidence": 0.0,
+                    "bounding_box": []
+                }
 
-            # Lấy class index và confidence của object đầu tiên
-            cls_id = int(result.boxes.cls[0])
-            confidence = float(result.boxes.conf[0])
+            # Lấy box có độ tin cậy cao nhất
+            best_idx = result.boxes.conf.argmax()
+            cls_id = int(result.boxes.cls[best_idx])
+            confidence = float(result.boxes.conf[best_idx])
+            box = result.boxes.xyxy[best_idx].tolist()  # [x1, y1, x2, y2]
+
             class_name = self.model.names[cls_id]
 
             output = {
                 "classification": class_name,
-                "confidence": round(confidence * 100, 2)  # Convert to percentage
+                "confidence": round(confidence * 100, 2),  # %
+                "bounding_box": [int(round(x)) for x in box]
             }
 
             print(f"[predict_image] Kết quả: {output}")
@@ -60,21 +63,50 @@ class Classifier:
             return {
                 "classification": "Error",
                 "confidence": 0.0,
+                "bounding_box": [],
                 "error": str(e)
             }
 
-    def predict_frame(self, frame: np.ndarray) -> Dict[str, Union[str, float]]:
+    def predict_frame(self, frame: np.ndarray) -> Dict[str, Union[str, float, List[int]]]:
         """
         Predict classification for a video frame (ndarray).
         """
         try:
             image = Image.fromarray(frame)
-            return self.predict_image(image)
+            results = self.model(image)
+            result = results[0]
+
+            if not result.boxes or len(result.boxes.cls) == 0:
+                print("Không phát hiện đối tượng.")
+                return {
+                    "classification": "Không xác định",
+                    "confidence": 0.0,
+                    "bounding_box": []
+                }
+
+            # Lấy box có độ tin cậy cao nhất
+            best_idx = result.boxes.conf.argmax()
+            cls_id = int(result.boxes.cls[best_idx])
+            confidence = float(result.boxes.conf[best_idx])
+            box = result.boxes.xyxy[best_idx].tolist()
+
+            class_name = self.model.names[cls_id]
+
+            output = {
+                "classification": class_name,
+                "confidence": round(confidence * 100, 2),  # %
+                "bounding_box": [int(round(x)) for x in box]
+            }
+
+            print(f"[predict_frame] Kết quả: {output}")
+            return output
+
         except Exception as e:
             print(f"[predict_frame] Lỗi: {e}")
             return {
                 "classification": "Error",
                 "confidence": 0.0,
+                "bounding_box": [],
                 "error": str(e)
             }
 
