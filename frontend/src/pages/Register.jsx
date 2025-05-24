@@ -7,6 +7,7 @@ function Register() {
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -14,7 +15,6 @@ function Register() {
             await register({
                 username,
                 password,
-                email,
                 Role: "user" 
             });
             alert('Đăng ký thành công');
@@ -62,18 +62,6 @@ function Register() {
                                     autoComplete="new-password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    className="mt-1 block w-full rounded-md border-2 border-gray-200 shadow-sm focus:border-blue-600 focus:ring-blue-600"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Email</label>
-                                <input
-                                    type="email"
-                                    autoComplete="off"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
                                     required
                                     className="mt-1 block w-full rounded-md border-2 border-gray-200 shadow-sm focus:border-blue-600 focus:ring-blue-600"
                                 />

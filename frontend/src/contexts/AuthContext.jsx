@@ -43,7 +43,6 @@ export const AuthProvider = ({ children }) => {
       const response = await api.post('/auth/register', {
         username,
         password,
-        email,
         Role: "user"
       });
 
@@ -65,7 +64,6 @@ export const AuthProvider = ({ children }) => {
       formData.append('username', username);
       formData.append('password', password);
       if (newPassword) formData.append('new_password', newPassword);
-      if (newEmail) formData.append('new_email', newEmail);
 
       const response = await api.post('/auth/update-profile', formData.toString(), {
         headers: {

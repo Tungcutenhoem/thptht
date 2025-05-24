@@ -42,12 +42,9 @@ def login_user(
 def register(user_data: schemas.auth.UserCreate, db: Session = Depends(get_db)):
     # Check if user already exists
     print("Received data:", user_data.dict())
-    if db.query(models.user.User).filter(models.user.User.email == user_data.email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
 
     new_user = models.user.User(
         username=user_data.username,
-        email=user_data.email,
         hashed_password=hash_password(user_data.password)
     )
 
@@ -59,8 +56,7 @@ def register(user_data: schemas.auth.UserCreate, db: Session = Depends(get_db)):
 @router.post("/update-profile")
 def update_profile(
     form_data: OAuth2PasswordRequestForm = Depends(),  # username + old_password
-    new_password: str = Form(None),                    # optional
-    new_email: str = Form(None),                       # optional
+    new_password: str = Form(None),                    # optional                    # optional
     db: Session = Depends(get_db)
 ):
     # Lấy user từ DB
@@ -77,11 +73,6 @@ def update_profile(
     if new_password:
         user.hashed_password = hash_password(new_password)
 
-    # Cập nhật email mới nếu có
-    if new_email:
-        if db.query(models.user.User).filter(models.user.User.email == new_email).first():
-            raise HTTPException(status_code=400, detail="Email đã được sử dụng")
-        user.email = new_email
 
     db.commit()
     db.refresh(user)
