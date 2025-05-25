@@ -1,11 +1,11 @@
 # ai-sys
 hệ thống phân loại chất lượng thực phẩm
 # Tên thành viên:
-Nguyễn Bá Quang - 23020412
-Vũ Minh Sơn - 23020424
-Mai Minh Tùng - 23020432
-Phạm Thế Trung - 
-Nguyễn Hoàng Tú - 
+* Nguyễn Bá Quang - 23020412
+* Vũ Minh Sơn - 23020424
+* Mai Minh Tùng - 23020432
+* Phạm Thế Trung - 
+* Nguyễn Hoàng Tú - 
 # Mô tả dự án:
 ### 📦 **MÔ TẢ DỰ ÁN: Hệ Thống Phân Loại Chất Lượng Thực Phẩm (Food Quality Classification System)**
 
@@ -15,9 +15,9 @@ Nguyễn Hoàng Tú -
 
 Xây dựng một hệ thống web giúp người dùng kiểm tra **chất lượng cà chua** dựa trên hình ảnh, video hoặc luồng webcam.
 Người dùng có thể:
-✅ Tải lên **ảnh** thực phẩm để phân loại
-✅ Tải lên **video** và nhận kết quả phân loại trên từng khung hình (frame)
-✅ Sử dụng **webcam** để kiểm tra chất lượng thực phẩm theo thời gian thực
+* ✅ Tải lên **ảnh** thực phẩm để phân loại
+* ✅ Tải lên **video** và nhận kết quả phân loại trên từng khung hình (frame)
+* ✅ Sử dụng **webcam** để kiểm tra chất lượng thực phẩm theo thời gian thực
 
 Hệ thống cung cấp một **giao diện admin** để thêm, sửa, xóa dữ liệu.
 
@@ -119,10 +119,10 @@ Hệ thống cung cấp một **giao diện admin** để thêm, sửa, xóa d�
 
 #### 📈 **7. Kết quả kỳ vọng**
 
-✅ Người dùng có thể nhanh chóng phân loại thực phẩm từ ảnh, video hoặc webcam.
-✅ Giao diện admin trực quan, dễ quản lý.
-✅ Backend phản hồi nhanh, hỗ trợ tải lớn và dễ mở rộng.
-✅ Dễ dàng deploy, scale khi cần thiết.
+* ✅ Người dùng có thể nhanh chóng phân loại thực phẩm từ ảnh, video hoặc webcam.
+* ✅ Giao diện admin trực quan, dễ quản lý.
+* ✅ Backend phản hồi nhanh, hỗ trợ tải lớn và dễ mở rộng.
+* ✅ Dễ dàng deploy, scale khi cần thiết.
 
 ---
 
