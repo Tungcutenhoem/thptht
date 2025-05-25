@@ -7,7 +7,7 @@ hệ thống phân loại chất lượng thực phẩm
 * Phạm Thế Trung - 
 * Nguyễn Hoàng Tú - 
 # Mô tả dự án:
-### 📦 **MÔ TẢ DỰ ÁN: Hệ Thống Phân Loại Chất Lượng Thực Phẩm (Food Quality Classification System)**
+### **MÔ TẢ DỰ ÁN: Hệ Thống Phân Loại Chất Lượng Thực Phẩm (Food Quality Classification System)**
 
 ---
 
@@ -119,10 +119,10 @@ Hệ thống cung cấp một **giao diện admin** để thêm, sửa, xóa d�
 
 #### **7. Kết quả kỳ vọng**
 
-* ✅ Người dùng có thể nhanh chóng phân loại thực phẩm từ ảnh, video hoặc webcam.
-* ✅ Giao diện admin trực quan, dễ quản lý.
-* ✅ Backend phản hồi nhanh, hỗ trợ tải lớn và dễ mở rộng.
-* ✅ Dễ dàng deploy, scale khi cần thiết.
+* Người dùng có thể nhanh chóng phân loại thực phẩm từ ảnh, video hoặc webcam.
+* Giao diện admin trực quan, dễ quản lý.
+* Backend phản hồi nhanh, hỗ trợ tải lớn và dễ mở rộng.
+* Dễ dàng deploy, scale khi cần thiết.
 
 ---
 
@@ -163,3 +163,5 @@ Truy cập ứng dụng
 Frontend: http://localhost:3000
 
 Backend API: http://localhost:8000/docs
+
+Chúng em xin cảm ơn thầy và các anh đã tận tình hướng dẫn, giải đáp thắc mắc của chúng em trong suốt quá trình thực hiện dự án này.
