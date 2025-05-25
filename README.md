@@ -5,7 +5,7 @@ hệ thống phân loại chất lượng thực phẩm
 * Vũ Minh Sơn - 23020424
 * Mai Minh Tùng - 23020432
 * Phạm Thế Trung - 
-* Nguyễn Hoàng Tú - 
+* Nguyễn Hoàng Tú - 23020428
 # Mô tả dự án:
 ### **MÔ TẢ DỰ ÁN: Hệ Thống Phân Loại Chất Lượng Thực Phẩm (Food Quality Classification System)**
 
